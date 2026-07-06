@@ -1,0 +1,6 @@
+Metti qui le immagini (Fase 0):
+- busta (fronte / texture)
+- cartoncino / texture carta
+- sigillo ceralacca (PNG trasparente, idealmente intero + spezzato)
+- monogramma / iniziali (SVG)
+- eventuale sfondo, foto sposi, decori

@@ -1,0 +1,7 @@
+/* PLACEHOLDER: nessuna texture "carta" fornita — sfondo panna a tinta unita
+   con un bordo oro sottile come sostituto. */
+.cartoncino {
+  background: var(--c-bianco);
+  border-top: 3px solid var(--c-oro);
+  min-height: 100svh;
+}

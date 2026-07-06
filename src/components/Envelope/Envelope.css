@@ -1,0 +1,96 @@
+.envelope-scene {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-panna);
+  padding: var(--sp-4);
+}
+
+.envelope {
+  position: relative;
+  width: min(90vw, 420px);
+  aspect-ratio: 4 / 3;
+  transform-style: preserve-3d;
+}
+
+/* PLACEHOLDER: texture busta assente — gradiente oro/panna come sostituto */
+.envelope-corpo {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(155deg, var(--c-bianco) 0%, var(--c-panna) 60%, var(--c-oro) 140%);
+  box-shadow: 0 20px 45px -20px rgba(74, 64, 56, 0.35);
+  border: 1px solid var(--c-oro);
+}
+
+.envelope-lembo {
+  position: absolute;
+  inset: 0;
+  bottom: 45%;
+  transform-origin: top center;
+  background: linear-gradient(160deg, var(--c-oro) 0%, var(--c-oro-scuro) 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 6px 6px 0 0;
+}
+
+.envelope-input-riga {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  text-align: center;
+}
+
+.envelope-input {
+  width: 100%;
+  font-family: var(--f-script);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--c-oro-scuro);
+  color: var(--c-testo);
+  text-align: center;
+  outline: none;
+  padding: var(--sp-1) 0;
+}
+
+.envelope-hint {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  color: var(--c-oro-scuro);
+  font-style: italic;
+}
+
+.sigillo {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--c-oro-scuro);
+  background: radial-gradient(circle at 35% 30%, var(--c-oro) 0%, var(--c-ceralacca) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sigillo:disabled {
+  cursor: default;
+}
+
+.sigillo-testo {
+  font-family: var(--f-script);
+  color: var(--c-bianco);
+  font-size: 1.1rem;
+}

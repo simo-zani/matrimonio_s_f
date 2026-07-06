@@ -1,0 +1,112 @@
+.sezione {
+  padding: var(--sp-8) var(--sp-4);
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.hero {
+  text-align: center;
+  padding-top: var(--sp-8);
+}
+
+.hero-eyelet {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--c-oro-scuro);
+  margin-bottom: var(--sp-2);
+}
+
+.hero-nomi {
+  font-family: var(--f-script);
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.hero-e {
+  font-family: var(--f-titolo);
+  color: var(--c-oro);
+}
+
+.hero-data {
+  margin-top: var(--sp-3);
+  font-size: 1.1rem;
+  color: var(--c-testo);
+}
+
+.storia h2,
+.dove-quando h2 {
+  text-align: center;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  margin-bottom: var(--sp-6);
+}
+
+.storia-testo {
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.storia-testo p + p {
+  margin-top: var(--sp-3);
+}
+
+.luoghi {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-6);
+}
+
+@media (min-width: 640px) {
+  .luoghi {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.luogo-card {
+  background: var(--c-panna);
+  border: 1px solid var(--c-oro);
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: center;
+  padding-bottom: var(--sp-4);
+}
+
+.luogo-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.luogo-card h3 {
+  margin-top: var(--sp-3);
+  font-size: 1.1rem;
+}
+
+.luogo-nome {
+  font-weight: 600;
+  margin-top: var(--sp-1);
+}
+
+.luogo-card p {
+  padding: 0 var(--sp-3);
+  margin-top: 2px;
+  font-size: 0.95rem;
+}
+
+.luogo-link {
+  display: inline-block;
+  margin-top: var(--sp-3);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--c-oro-scuro);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--c-oro-scuro);
+}
+
+.luogo-link:hover {
+  background: var(--c-oro);
+  color: var(--c-bianco);
+}

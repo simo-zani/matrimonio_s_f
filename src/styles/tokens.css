@@ -1,0 +1,46 @@
+/*
+  Design token — Fase 1.
+
+  Colori REALI: estratti campionando i pixel della Partecipazione_2.pdf
+  (assets/Partecipazione_2.pdf), il cartoncino oro dell'invito cartaceo.
+  Tutto il resto marcato PLACEHOLDER non è nel materiale fornito: è una
+  scelta provvisoria per avere un sito coerente da subito, da sostituire
+  quando arrivano gli asset veri (Fase 0).
+*/
+
+:root {
+  /* --- Colori confermati (dalla Partecipazione_2.pdf) --- */
+  --c-oro:        #dab866; /* oro del cartoncino, campionato dal PDF */
+  --c-oro-scuro:  #a3853f; /* variante scurita per bordi/ombre/contrasto */
+  --c-bianco:     #ffffff; /* testo bianco sul cartoncino oro */
+
+  /* --- PLACEHOLDER: non presenti nel materiale fornito --- */
+  --c-panna:      #f8f3e8; /* PLACEHOLDER sfondo pagina — Fase 0 non lo specifica */
+  --c-testo:      #4a4038; /* PLACEHOLDER testo principale (marrone caldo) */
+  --c-ceralacca:  #a3853f; /* PLACEHOLDER: l'invito reale NON ha un sigillo di
+                               ceralacca rosso, è tutto sul tema oro/cartoncino.
+                               Uso lo stesso oro scuro per il sigillo del sito,
+                               invece del rosso "classico" — verifica con Simone
+                               se preferisce un'altra scelta. */
+
+  /* --- Font --- */
+  /* Script: file reale fornito (assets/font/WEDDING IN THE STARLIGHT.TTF) */
+  --f-script: "WeddingStarlight", cursive;
+  /* PLACEHOLDER: nessun font titoli/testo fornito in Fase 0.
+     Uso due Google Fonts eleganti coerenti col tema, sostituibili subito. */
+  --f-titolo: "Cormorant Garamond", serif;
+  --f-testo:  "EB Garamond", serif;
+
+  /* Spacing scale */
+  --sp-1: 0.5rem;  --sp-2: 1rem;   --sp-3: 1.5rem;
+  --sp-4: 2rem;    --sp-6: 3rem;   --sp-8: 4rem;
+
+  /* Curve/durate condivise per coerenza delle animazioni */
+  --ease-morbido: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@font-face {
+  font-family: "WeddingStarlight";
+  src: url("/fonts/wedding-in-the-starlight.ttf") format("truetype");
+  font-display: swap;
+}

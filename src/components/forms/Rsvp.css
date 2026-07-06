@@ -1,0 +1,136 @@
+.rsvp {
+  padding-bottom: var(--sp-8);
+}
+
+.rsvp-scadenza {
+  text-align: center;
+  color: var(--c-oro-scuro);
+  margin-top: calc(-1 * var(--sp-4));
+  margin-bottom: var(--sp-4);
+  font-size: 0.9rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
+}
+
+.campo > span:first-child {
+  font-weight: 600;
+  color: var(--c-oro-scuro);
+}
+
+input,
+textarea {
+  font-family: var(--f-testo);
+  font-size: 1rem;
+  padding: var(--sp-2);
+  border: 1px solid var(--c-oro);
+  border-radius: 6px;
+  background: var(--c-bianco);
+  color: var(--c-testo);
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--c-oro-scuro);
+  outline-offset: 1px;
+}
+
+.scelta-presenza {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.scelta-presenza button {
+  flex: 1;
+  padding: var(--sp-2);
+  border: 1px solid var(--c-oro-scuro);
+  border-radius: 8px;
+  background: var(--c-bianco);
+  cursor: pointer;
+}
+
+.scelta-presenza button.attivo {
+  background: var(--c-oro);
+  color: var(--c-bianco);
+}
+
+.riga-ospite {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: var(--sp-2);
+  align-items: center;
+  margin-bottom: var(--sp-2);
+}
+
+.tipo-badge {
+  font-size: 0.75rem;
+  color: var(--c-oro-scuro);
+  white-space: nowrap;
+}
+
+.rimuovi-ospite {
+  border: none;
+  background: none;
+  color: #b23b3b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.aggiungi-riga {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+.aggiungi-riga button {
+  border: 1px dashed var(--c-oro-scuro);
+  background: none;
+  border-radius: 6px;
+  padding: var(--sp-1) var(--sp-2);
+  cursor: pointer;
+  color: var(--c-oro-scuro);
+}
+
+.rsvp-errore {
+  color: #b23b3b;
+  margin-bottom: var(--sp-2);
+}
+
+.rsvp-invia {
+  width: 100%;
+  padding: var(--sp-3);
+  background: var(--c-oro-scuro);
+  color: var(--c-bianco);
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.rsvp-invia:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.rsvp-nota-dev {
+  margin-top: var(--sp-2);
+  font-size: 0.8rem;
+  color: #9a7a4a;
+  font-style: italic;
+}
+
+.rsvp-successo {
+  text-align: center;
+  padding: var(--sp-8) 0;
+}
+
+.rsvp-successo-sigillo {
+  font-family: var(--f-script);
+  font-size: 2rem;
+  color: var(--c-oro-scuro);
+}
