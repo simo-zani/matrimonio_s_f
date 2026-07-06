@@ -19,9 +19,10 @@
 
 .hero-nomi {
   font-family: var(--f-script);
-  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-size: clamp(1.2rem, 4.2vw, 2.8rem);
   font-weight: 400;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .hero-e {

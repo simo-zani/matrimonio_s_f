@@ -1,0 +1,20 @@
+/* ── Page reveal container ── */
+.sr-page {
+  position: relative;
+  min-height: 100svh;
+  background: var(--c-bianco);
+}
+
+/* ── Active zoom animation state ── */
+.sr-page--animating {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Scales exactly from the center of the viewport, matching the envelope center */
+  transform-origin: center center;
+  overflow: hidden;
+  z-index: 9998;
+  box-shadow: 0 12px 50px rgba(74, 64, 56, 0.25);
+}

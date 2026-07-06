@@ -1,7 +1,55 @@
-/* PLACEHOLDER: nessuna texture "carta" fornita — sfondo panna a tinta unita
-   con un bordo oro sottile come sostituto. */
 .cartoncino {
-  background: var(--c-bianco);
-  border-top: 3px solid var(--c-oro);
+  background: #faf6eb; /* Sfondo panna/oro chiaro molto caldo ed elegante */
   min-height: 100svh;
 }
+
+/* ── Cornice dorata fissa più spessa e sfumata verso l'interno dello schermo ── */
+@keyframes oro-shimmer {
+  0%, 100% {
+    border-color: #ffd984;
+    box-shadow:
+      inset 0 0 30px 10px #faf6eb,                /* Sfumatura morbida verso lo sfondo panna */
+      inset 0 0 15px rgba(110, 84, 27, 0.15),
+      0 0 10px rgba(255, 217, 132, 0.2);
+  }
+  50% {
+    border-color: #dab866;
+    box-shadow:
+      inset 0 0 30px 10px #faf6eb,                /* Mantiene la sfumatura morbida */
+      inset 0 0 10px rgba(110, 84, 27, 0.1),
+      0 0 5px rgba(218, 184, 102, 0.1);
+  }
+}
+
+.schermo-cornice-oro {
+  position: fixed;
+  inset: 0;
+  border: 14px solid var(--c-oro); /* Cornice più spessa (14px invece di 5px) */
+  pointer-events: none;
+  z-index: 9999;
+  animation: oro-shimmer 4s ease-in-out infinite;
+}
+
+/* ── Transizione Elegante con Bagliore Espansivo ── */
+.transizione-bagliore {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vmax;
+  height: 100vmax;
+  margin-top: -50vmax;
+  margin-left: -50vmax;
+  background: radial-gradient(
+    circle,
+    #fff7e4 0%,
+    #e8c77b 45%,
+    #a3853f 70%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  will-change: transform, opacity;
+  box-shadow: 0 0 100px 50px #fff7e4;
+}
+

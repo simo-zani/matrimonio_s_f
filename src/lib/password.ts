@@ -16,5 +16,10 @@ function normalizza(s: string): string {
 const PASSWORD = normalizza("Stefano e Francesca");
 
 export function passwordCorretta(input: string): boolean {
-  return normalizza(input) === PASSWORD;
+  const norm = input
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+  
+  return norm.includes("stefano") && norm.includes("francesca");
 }
