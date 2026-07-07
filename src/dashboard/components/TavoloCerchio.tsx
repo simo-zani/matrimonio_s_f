@@ -18,7 +18,6 @@ export function TavoloCerchio({
   tavolo,
   ospiti,
   evidenziato,
-  ospiteSelezionato,
   onAssegna,
   onRimuovi,
   onDragEnd,
@@ -261,7 +260,6 @@ export function TavoloCerchio({
               <button
                 type="button"
                 className="sedia-vuota"
-                disabled={!ospiteSelezionato}
                 onClick={(e) => {
                   e.stopPropagation(); // Evita il drag/evidenzia sul tavolo
                   onAssegna(tavolo.id, idx);
