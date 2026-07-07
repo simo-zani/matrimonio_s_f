@@ -9,20 +9,24 @@
 }
 
 .dashboard-root {
-  min-height: 100vh;
+  height: 100vh;
   background-color: #fcfbfa;
   font-family: var(--f-testo);
   color: var(--c-testo);
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── Navigazione & Header ── */
 .dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
   background: var(--c-panna);
   border-bottom: 2px solid var(--c-oro);
-  padding: var(--sp-3) var(--sp-6);
+  padding: 8px var(--sp-6);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,14 +42,14 @@
 
 .dashboard-titolo .titolo-nomi {
   font-family: var(--f-script);
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   color: var(--c-testo);
   line-height: 1;
 }
 
 .dashboard-titolo .titolo-amp {
   font-family: var(--f-titolo);
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: var(--c-oro-scuro);
   font-weight: normal;
 }
@@ -59,9 +63,9 @@
   background: transparent;
   border: 1px solid transparent;
   color: var(--c-testo);
-  padding: var(--sp-1) var(--sp-4);
+  padding: 4px 12px;
   font-family: var(--f-testo);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   cursor: pointer;
   border-radius: 6px;
   font-weight: 500;
@@ -170,6 +174,8 @@
   max-width: 1100px;
   margin: 0 auto;
   width: 100%;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .stat-grid {
@@ -259,7 +265,7 @@
   flex: 1;
   display: grid;
   grid-template-columns: 300px 1fr 280px;
-  height: calc(100vh - 65px);
+  height: 100%;
   overflow: hidden;
 }
 

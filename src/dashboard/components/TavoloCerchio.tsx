@@ -45,7 +45,10 @@ export function TavoloCerchio({
     const raggioSedie = raggioCentrale + 24;
 
     for (let i = 0; i < capienza; i++) {
-      const angolo = (360 / capienza) * i - 90; // Inizia dall'alto (-90deg)
+      let angolo = (360 / capienza) * i - 90; // Inizia dall'alto (-90deg)
+      if (isSposi && capienza === 2) {
+        angolo = i === 0 ? -125 : -55;
+      }
       const rad = (angolo * Math.PI) / 180;
       sediePos.push({
         x: raggioCentrale + raggioSedie * Math.cos(rad),
@@ -198,18 +201,18 @@ export function TavoloCerchio({
         <span
           style={{
             fontFamily: "var(--f-titolo)",
-            fontSize: isSposi ? "1.6rem" : "1.25rem",
+            fontSize: isSposi ? "1.45rem" : "1.25rem",
             fontWeight: "bold",
             lineHeight: 1.1,
             color: isSposi ? "white" : "var(--c-testo)",
             textAlign: "center",
           }}
         >
-          {isSposi ? "S & F" : tavolo.nome}
+          {isSposi ? "SPOSI" : tavolo.nome}
         </span>
         {isSposi && (
-          <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: "var(--f-testo)" }}>
-            Sposi
+          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.9)", fontFamily: "var(--f-testo)", fontWeight: "bold", letterSpacing: "0.03em", marginTop: "3px", textAlign: "center" }}>
+            STEFANO e FRANCESCA
           </span>
         )}
       </div>

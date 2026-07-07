@@ -1,9 +1,57 @@
 import { useState, useEffect } from "react";
-import { logoutDashboard } from "./lib/dashboardAuth";
 import { fetchGuestsAndTables, type DBRsvp, type DBTable, type DBSeat } from "./lib/queries";
 import { ListaInvitati } from "./ListaInvitati";
 import { GestioneTavoli } from "./GestioneTavoli";
 import "./dashboard.css";
+
+function CountdownMessa() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const targetDate = new Date("2026-09-05T10:30:00+02:00").getTime();
+
+    function update() {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        setTimeLeft("Oggi Sposi!");
+        return;
+      }
+
+      const giorni = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const ore = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minuti = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secondi = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(`Mancano: ${giorni}g ${ore}o ${minuti}m ${secondi}s`);
+    }
+
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="countdown-header" style={{
+      fontFamily: "var(--f-testo)",
+      fontSize: "0.82rem",
+      color: "var(--c-oro-scuro)",
+      background: "#fffdf9",
+      border: "1px solid var(--c-oro)",
+      padding: "4px 10px",
+      borderRadius: "20px",
+      fontWeight: 600,
+      whiteSpace: "nowrap",
+      boxShadow: "inset 0 1px 3px rgba(0,0,0,0.02)",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px"
+    }}>
+      <span>⏳</span> {timeLeft}
+    </div>
+  );
+}
 
 type TabAttiva = "invitati" | "tavoli";
 
@@ -58,9 +106,7 @@ export function DashboardMain() {
           </button>
         </nav>
 
-        <button className="logout-btn" onClick={logoutDashboard}>
-          Esci
-        </button>
+        <CountdownMessa />
       </header>
 
       {/* ── Contenuto principale ── */}
