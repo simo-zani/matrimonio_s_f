@@ -843,6 +843,8 @@
   outline: none;
   font-family: var(--f-testo);
   font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modale-riga-scelta {
