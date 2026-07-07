@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const SESSION_KEY = "dashboard_mg2027_autenticato";
+const SESSION_KEY = "dashboard_sf2026_autenticato";
 
 /**
  * Accesso semplificato: username nella lista + password corretta.

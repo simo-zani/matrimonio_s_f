@@ -15,7 +15,7 @@ import "./components/Reveal/Cartoncino.css";
 type AppFase = "busta" | "bagliore_espande" | "bagliore_dirada" | "aperta";
 
 // ── Slug segreto della dashboard — non compare in nessun link pubblico del sito ──
-const DASHBOARD_PATH = "/dashboard-mg2027";
+const DASHBOARD_PATH = "/dashboard-sf2026";
 
 function DashboardRouter() {
   const sessione = useSessioneAttiva();
