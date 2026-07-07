@@ -10,9 +10,7 @@ export function Rsvp() {
   const [nomeContatto, setNomeContatto] = useState("");
   const [cognomeContatto, setCognomeContatto] = useState("");
   const [presenza, setPresenza] = useState<boolean | null>(null);
-  const [guests, setGuests] = useState<Guest[]>([
-    { nome: "", cognome: "", tipo: "adulto" },
-  ]);
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [allergie, setAllergie] = useState("");
   const [stato, setStato] = useState<Stato>("idle");
   const [erroreMsg, setErroreMsg] = useState("");
@@ -23,9 +21,9 @@ export function Rsvp() {
     );
 
   // Il numero di accompagnatori pilota quante righe nome/cognome compaiono.
-  // Minimo 1, mai 0 o negativo; le righe già compilate vengono conservate.
+  // Minimo 0 (si può venire da soli); le righe già compilate vengono conservate.
   const impostaNumero = (n: number) => {
-    const target = Math.max(1, Math.floor(Number.isNaN(n) ? 1 : n));
+    const target = Math.max(0, Math.floor(Number.isNaN(n) ? 0 : n));
     setGuests((g) => {
       if (target === g.length) return g;
       if (target < g.length) return g.slice(0, target);
@@ -163,14 +161,14 @@ export function Rsvp() {
             <button
               type="button"
               onClick={() => impostaNumero(guests.length - 1)}
-              disabled={guests.length <= 1}
+              disabled={guests.length <= 0}
               aria-label="Diminuisci"
             >
               −
             </button>
             <input
               type="number"
-              min={1}
+              min={0}
               step={1}
               value={guests.length}
               onChange={(e) => impostaNumero(parseInt(e.target.value, 10))}

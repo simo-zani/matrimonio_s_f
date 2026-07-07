@@ -50,6 +50,8 @@ textarea:focus {
   border: 1px solid var(--c-oro-scuro);
   border-radius: 8px;
   background: var(--c-bianco);
+  color: var(--c-oro-scuro);
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
