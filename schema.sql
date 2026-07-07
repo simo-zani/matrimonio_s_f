@@ -54,6 +54,7 @@ create table public.posti (
   fonte             text not null default 'manuale',
   rsvp_id           uuid references public.rsvp(id) on delete set null,
   rsvp_guest_index  int,
+  sedia_index       int,   -- sedia effettivamente scelta al tavolo (0..capienza-1)
   created_at        timestamptz default now(),
   unique (rsvp_id, rsvp_guest_index)
 );
@@ -89,4 +90,22 @@ create policy "tavoli all anon" on public.tavoli
 
 create policy "posti all anon" on public.posti
   for all to anon using (true) with check (true);
+*/
+
+
+-- ══════════════════════════════════════════════════
+-- SE HAI GIÀ ESEGUITO LO SCRIPT SENZA LA COLONNA "sedia_index":
+-- (serve per far sì che la sedia su cui clicchi sia davvero quella occupata,
+--  e per gli avvisi "tavolo diverso" / "non accanto" nella gestione tavoli)
+-- Esegui queste righe nel SQL Editor di Supabase.
+-- ══════════════════════════════════════════════════
+
+/*
+-- Aggiunge la colonna (i posti già assegnati restano validi grazie al fallback lato app)
+alter table public.posti
+  add column if not exists sedia_index int;
+
+-- Opzionale ma consigliato: impedisce due persone sulla stessa sedia dello stesso tavolo
+create unique index if not exists posti_tavolo_sedia_uniq
+  on public.posti (tavolo_id, sedia_index);
 */

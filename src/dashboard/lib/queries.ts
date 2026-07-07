@@ -19,6 +19,8 @@ export interface DBSeat {
   fonte: "rsvp" | "manuale";
   rsvp_id?: string | null;
   rsvp_guest_index?: number | null;
+  /** Indice della sedia effettivamente scelta al tavolo (0..capienza-1). */
+  sedia_index?: number | null;
 }
 
 export interface DBRsvp {
@@ -100,7 +102,8 @@ export async function assegnaPosto(
   allergie: string | null,
   fonte: "rsvp" | "manuale",
   rsvp_id: string | null = null,
-  rsvp_guest_index: number | null = null
+  rsvp_guest_index: number | null = null,
+  sedia_index: number | null = null
 ): Promise<DBSeat> {
   const { data, error } = await supabase
     .from("posti")
@@ -113,6 +116,7 @@ export async function assegnaPosto(
       fonte,
       rsvp_id,
       rsvp_guest_index,
+      sedia_index,
     })
     .select()
     .single();
@@ -132,4 +136,55 @@ export async function assegnaPosto(
 export async function rimuoviPosto(posto_id: string) {
   const { error } = await supabase.from("posti").delete().eq("id", posto_id);
   if (error) throw new Error("Impossibile rimuovere l'ospite dal posto: " + error.message);
+}
+
+/**
+ * Elimina un intero invitato (il nucleo RSVP: compilatore + accompagnatori) e
+ * libera tutti i posti che erano stati assegnati a quel nucleo.
+ */
+export async function cancellaRsvp(id: string) {
+  // Prima libera gli eventuali posti collegati, poi elimina la risposta.
+  await supabase.from("posti").delete().eq("rsvp_id", id);
+  const { error } = await supabase.from("rsvp").delete().eq("id", id);
+  if (error) throw new Error("Impossibile eliminare l'invitato: " + error.message);
+}
+
+/**
+ * Elimina un singolo accompagnatore da un nucleo RSVP.
+ * Aggiorna l'array `guests`, libera l'eventuale posto assegnato a quel
+ * accompagnatore e riallinea gli indici dei posti degli accompagnatori
+ * successivi (che scalano di una posizione nell'array).
+ */
+export async function rimuoviAccompagnatore(rsvp: DBRsvp, guestIndex: number) {
+  const nuoviGuests = rsvp.guests.filter((_, i) => i !== guestIndex);
+
+  // 1. Salva il nuovo array senza l'accompagnatore rimosso.
+  const { error } = await supabase
+    .from("rsvp")
+    .update({ guests: nuoviGuests })
+    .eq("id", rsvp.id);
+  if (error) throw new Error("Impossibile eliminare l'accompagnatore: " + error.message);
+
+  // 2. Libera l'eventuale posto di quell'accompagnatore.
+  await supabase
+    .from("posti")
+    .delete()
+    .eq("rsvp_id", rsvp.id)
+    .eq("rsvp_guest_index", guestIndex);
+
+  // 3. Riallinea gli indici dei posti degli accompagnatori con indice maggiore.
+  const { data: postiSuccessivi } = await supabase
+    .from("posti")
+    .select("id, rsvp_guest_index")
+    .eq("rsvp_id", rsvp.id)
+    .gt("rsvp_guest_index", guestIndex);
+
+  if (postiSuccessivi) {
+    for (const p of postiSuccessivi) {
+      await supabase
+        .from("posti")
+        .update({ rsvp_guest_index: (p.rsvp_guest_index as number) - 1 })
+        .eq("id", p.id);
+    }
+  }
 }

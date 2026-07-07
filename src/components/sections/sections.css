@@ -65,10 +65,6 @@
 }
 
 .luogo-card {
-  background: var(--c-panna);
-  border: 1px solid var(--c-oro);
-  border-radius: 10px;
-  overflow: hidden;
   text-align: center;
   padding-bottom: var(--sp-4);
 }
@@ -78,6 +74,9 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
+  /* Nessun bordo: i margini dell'immagine si sfumano e si fondono con lo sfondo */
+  -webkit-mask-image: radial-gradient(ellipse 92% 90% at center, #000 55%, transparent 94%);
+  mask-image: radial-gradient(ellipse 92% 90% at center, #000 55%, transparent 94%);
 }
 
 .luogo-card h3 {

@@ -1,11 +1,50 @@
-import type { DBRsvp } from "./lib/queries";
+import { useState } from "react";
+import { cancellaRsvp, rimuoviAccompagnatore, type DBRsvp } from "./lib/queries";
 import "./dashboard.css";
 
 interface ListaInvitatiProps {
   rsvps: DBRsvp[];
+  onAggiorna: () => Promise<void>;
 }
 
-export function ListaInvitati({ rsvps }: ListaInvitatiProps) {
+export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
+  const [inCorso, setInCorso] = useState(false);
+  const [errore, setErrore] = useState<string | null>(null);
+
+  async function eliminaInvitato(r: DBRsvp) {
+    if (
+      !confirm(
+        `Eliminare definitivamente "${r.nome_contatto}" e tutti i suoi accompagnatori? I posti assegnati verranno liberati.`
+      )
+    )
+      return;
+    setInCorso(true);
+    setErrore(null);
+    try {
+      await cancellaRsvp(r.id);
+      await onAggiorna();
+    } catch (e: any) {
+      setErrore(e.message || "Errore durante l'eliminazione.");
+    } finally {
+      setInCorso(false);
+    }
+  }
+
+  async function eliminaAccompagnatore(r: DBRsvp, idx: number) {
+    const g = r.guests[idx];
+    if (!confirm(`Eliminare l'accompagnatore "${g.nome} ${g.cognome}"?`)) return;
+    setInCorso(true);
+    setErrore(null);
+    try {
+      await rimuoviAccompagnatore(r, idx);
+      await onAggiorna();
+    } catch (e: any) {
+      setErrore(e.message || "Errore durante l'eliminazione.");
+    } finally {
+      setInCorso(false);
+    }
+  }
+
   // Calcolo statistiche
   const nucleoSi = rsvps.filter((r) => r.presenza);
   const nucleoNo = rsvps.filter((r) => !r.presenza);
@@ -77,6 +116,9 @@ export function ListaInvitati({ rsvps }: ListaInvitatiProps) {
       <h3 style={{ fontFamily: "var(--f-titolo)", color: "var(--c-oro-scuro)", fontSize: "1.4rem", marginBottom: "var(--sp-3)" }}>
         Dettaglio delle Conferme
       </h3>
+      {errore && (
+        <p style={{ color: "var(--c-rosso-elimina)", marginBottom: "var(--sp-2)" }}>{errore}</p>
+      )}
       <div className="rsvp-tabella-container">
         <table className="rsvp-table">
           <thead>
@@ -86,12 +128,13 @@ export function ListaInvitati({ rsvps }: ListaInvitatiProps) {
               <th>Presenza</th>
               <th>Accompagnatori</th>
               <th>Allergie / Intolleranze</th>
+              <th>Azioni</th>
             </tr>
           </thead>
           <tbody>
             {rsvps.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ textAlign: "center", color: "var(--c-oro-scuro)" }}>
+                <td colSpan={6} style={{ textAlign: "center", color: "var(--c-oro-scuro)" }}>
                   Nessuna risposta di conferma registrata finora.
                 </td>
               </tr>
@@ -116,13 +159,24 @@ export function ListaInvitati({ rsvps }: ListaInvitatiProps) {
                     <td>
                       {r.presenza ? (
                         r.guests && r.guests.length > 0 ? (
-                          <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "0.95rem" }}>
+                          <ul className="lista-accompagnatori">
                             {r.guests.map((g, idx) => (
                               <li key={idx}>
-                                {g.nome} {g.cognome}{" "}
-                                <span style={{ fontSize: "0.75rem", color: "var(--c-oro-scuro)" }}>
-                                  ({g.tipo})
+                                <span>
+                                  {g.nome} {g.cognome}{" "}
+                                  <span style={{ fontSize: "0.75rem", color: "var(--c-oro-scuro)" }}>
+                                    ({g.tipo})
+                                  </span>
                                 </span>
+                                <button
+                                  type="button"
+                                  className="elimina-accompagnatore"
+                                  title="Elimina accompagnatore"
+                                  disabled={inCorso}
+                                  onClick={() => eliminaAccompagnatore(r, idx)}
+                                >
+                                  ✕
+                                </button>
                               </li>
                             ))}
                           </ul>
@@ -143,6 +197,16 @@ export function ListaInvitati({ rsvps }: ListaInvitatiProps) {
                       ) : (
                         "-"
                       )}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="elimina-invitato-btn"
+                        disabled={inCorso}
+                        onClick={() => eliminaInvitato(r)}
+                      >
+                        Elimina
+                      </button>
                     </td>
                   </tr>
                 );

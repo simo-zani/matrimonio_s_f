@@ -8,6 +8,7 @@ type Stato = "idle" | "sending" | "success" | "error";
 
 export function Rsvp() {
   const [nomeContatto, setNomeContatto] = useState("");
+  const [cognomeContatto, setCognomeContatto] = useState("");
   const [presenza, setPresenza] = useState<boolean | null>(null);
   const [guests, setGuests] = useState<Guest[]>([
     { nome: "", cognome: "", tipo: "adulto" },
@@ -16,18 +17,35 @@ export function Rsvp() {
   const [stato, setStato] = useState<Stato>("idle");
   const [erroreMsg, setErroreMsg] = useState("");
 
-  const aggiungi = (tipo: Guest["tipo"]) =>
-    setGuests((g) => [...g, { nome: "", cognome: "", tipo }]);
-  const rimuovi = (i: number) =>
-    setGuests((g) => g.filter((_, idx) => idx !== i));
   const aggiorna = (i: number, campo: keyof Guest, valore: string) =>
     setGuests((g) =>
       g.map((ospite, idx) => (idx === i ? { ...ospite, [campo]: valore } : ospite))
     );
 
+  // Il numero di accompagnatori pilota quante righe nome/cognome compaiono.
+  // Minimo 1, mai 0 o negativo; le righe già compilate vengono conservate.
+  const impostaNumero = (n: number) => {
+    const target = Math.max(1, Math.floor(Number.isNaN(n) ? 1 : n));
+    setGuests((g) => {
+      if (target === g.length) return g;
+      if (target < g.length) return g.slice(0, target);
+      return [
+        ...g,
+        ...Array.from({ length: target - g.length }, () => ({
+          nome: "",
+          cognome: "",
+          tipo: "adulto" as const,
+        })),
+      ];
+    });
+  };
+
+  const toggleBambino = (i: number) =>
+    aggiorna(i, "tipo", guests[i].tipo === "bambino" ? "adulto" : "bambino");
+
   async function invia() {
-    if (!nomeContatto.trim()) {
-      setErroreMsg("Manca il nome di chi risponde.");
+    if (!nomeContatto.trim() || !cognomeContatto.trim()) {
+      setErroreMsg("Inserisci il tuo nome e cognome.");
       setStato("error");
       return;
     }
@@ -36,8 +54,8 @@ export function Rsvp() {
       setStato("error");
       return;
     }
-    if (presenza && !guests.some((g) => g.nome.trim() && g.cognome.trim())) {
-      setErroreMsg("Aggiungi almeno un ospite con nome e cognome.");
+    if (presenza && guests.some((g) => !g.nome.trim() || !g.cognome.trim())) {
+      setErroreMsg("Compila nome e cognome di tutti gli accompagnatori.");
       setStato("error");
       return;
     }
@@ -50,7 +68,7 @@ export function Rsvp() {
       // vero parte da solo appena .env viene compilato (vedi lib/supabase.ts).
       await new Promise((r) => setTimeout(r, 500));
       console.info("[RSVP - anteprima, non salvato]", {
-        nomeContatto,
+        nome_contatto: `${nomeContatto.trim()} ${cognomeContatto.trim()}`,
         presenza,
         guests: presenza ? guests : [],
         allergie: allergie || null,
@@ -60,7 +78,7 @@ export function Rsvp() {
     }
 
     const { error } = await supabase.from("rsvp").insert({
-      nome_contatto: nomeContatto,
+      nome_contatto: `${nomeContatto.trim()} ${cognomeContatto.trim()}`,
       presenza,
       guests: presenza ? guests : [],
       allergie: allergie || null,
@@ -100,14 +118,23 @@ export function Rsvp() {
         <p className="rsvp-scadenza">Rispondi entro il {scadenzaRsvp}</p>
       )}
 
-      <label className="campo">
+      <div className="campo">
         <span>Il tuo nome</span>
-        <input
-          value={nomeContatto}
-          onChange={(e) => setNomeContatto(e.target.value)}
-          placeholder="Nome e cognome"
-        />
-      </label>
+        <div className="riga-nome-cognome">
+          <input
+            value={nomeContatto}
+            onChange={(e) => setNomeContatto(e.target.value)}
+            placeholder="Nome"
+            aria-label="Il tuo nome"
+          />
+          <input
+            value={cognomeContatto}
+            onChange={(e) => setCognomeContatto(e.target.value)}
+            placeholder="Cognome"
+            aria-label="Il tuo cognome"
+          />
+        </div>
+      </div>
 
       <div className="campo">
         <span>Ci sarai?</span>
@@ -131,7 +158,33 @@ export function Rsvp() {
 
       {presenza && (
         <div className="campo">
-          <span>Chi viene con te?</span>
+          <span>Numero accompagnatori</span>
+          <div className="stepper">
+            <button
+              type="button"
+              onClick={() => impostaNumero(guests.length - 1)}
+              disabled={guests.length <= 1}
+              aria-label="Diminuisci"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={guests.length}
+              onChange={(e) => impostaNumero(parseInt(e.target.value, 10))}
+              aria-label="Numero accompagnatori"
+            />
+            <button
+              type="button"
+              onClick={() => impostaNumero(guests.length + 1)}
+              aria-label="Aumenta"
+            >
+              +
+            </button>
+          </div>
+
           {guests.map((g, i) => (
             <div className="riga-ospite" key={i}>
               <input
@@ -144,29 +197,18 @@ export function Rsvp() {
                 value={g.cognome}
                 onChange={(e) => aggiorna(i, "cognome", e.target.value)}
               />
-              <span className="tipo-badge">
-                {g.tipo === "adulto" ? "adulto" : "bambino"}
-              </span>
-              {guests.length > 1 && (
-                <button
-                  type="button"
-                  className="rimuovi-ospite"
-                  onClick={() => rimuovi(i)}
-                  aria-label="Rimuovi"
-                >
-                  ×
-                </button>
-              )}
+              <button
+                type="button"
+                className={
+                  g.tipo === "bambino" ? "toggle-bambino attivo" : "toggle-bambino"
+                }
+                onClick={() => toggleBambino(i)}
+                aria-pressed={g.tipo === "bambino"}
+              >
+                bambino
+              </button>
             </div>
           ))}
-          <div className="aggiungi-riga">
-            <button type="button" onClick={() => aggiungi("adulto")}>
-              + adulto
-            </button>
-            <button type="button" onClick={() => aggiungi("bambino")}>
-              + bambino
-            </button>
-          </div>
         </div>
       )}
 

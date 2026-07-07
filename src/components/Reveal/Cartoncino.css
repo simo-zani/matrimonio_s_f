@@ -1,5 +1,13 @@
 .cartoncino {
-  background: #faf6eb; /* Sfondo panna/oro chiaro molto caldo ed elegante */
+  /* Sfondo panna caldo con leggere macchie "acquerello" oro, in tono con le
+     illustrazioni dei luoghi: velature morbide sparse, appena percettibili */
+  background:
+    radial-gradient(42% 34% at 86% 10%, rgba(218, 184, 102, 0.16), transparent 70%),
+    radial-gradient(46% 40% at 6% 76%, rgba(163, 133, 63, 0.12), transparent 72%),
+    radial-gradient(30% 26% at 34% 40%, rgba(255, 217, 132, 0.10), transparent 70%),
+    radial-gradient(34% 30% at 92% 82%, rgba(218, 184, 102, 0.10), transparent 72%),
+    #faf6eb;
+  background-attachment: fixed;
   min-height: 100svh;
 }
 

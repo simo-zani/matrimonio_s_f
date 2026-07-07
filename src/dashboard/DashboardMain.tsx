@@ -88,7 +88,7 @@ export function DashboardMain() {
           </div>
         ) : (
           <>
-            {tab === "invitati" && <ListaInvitati rsvps={rsvps} />}
+            {tab === "invitati" && <ListaInvitati rsvps={rsvps} onAggiorna={caricaDati} />}
             {tab === "tavoli" && (
               <GestioneTavoli
                 rsvps={rsvps}

@@ -163,9 +163,15 @@ export function TavoloCerchio({
 
       {/* Sedie disposte intorno */}
       {sediePos.map((pos, idx) => {
-        // Cerca se c'è un occupante assegnato a questa sedia
-        // Usiamo un indice virtuale per abbinare le sedie
-        const occupante = ospiti.find((o) => o.rsvp_guest_index === idx || (o.fonte === "manuale" && ospiti.indexOf(o) === idx));
+        // Cerca l'occupante di questa sedia. Il nuovo modello usa sedia_index
+        // (la sedia effettivamente scelta col click); per i dati creati prima
+        // della colonna si ricade sul vecchio abbinamento.
+        const occupante = ospiti.find((o) =>
+          o.sedia_index !== null && o.sedia_index !== undefined
+            ? o.sedia_index === idx
+            : o.rsvp_guest_index === idx ||
+              (o.fonte === "manuale" && ospiti.indexOf(o) === idx)
+        );
 
         return (
           <div

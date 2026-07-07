@@ -58,42 +58,79 @@ textarea:focus {
   color: var(--c-bianco);
 }
 
-.riga-ospite {
+.riga-nome-cognome {
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr 1fr;
   gap: var(--sp-2);
-  align-items: center;
-  margin-bottom: var(--sp-2);
 }
 
-.tipo-badge {
-  font-size: 0.75rem;
+/* Selettore numero accompagnatori con frecce + input */
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  width: max-content;
+  border: 1px solid var(--c-oro);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--c-bianco);
+}
+
+.stepper button {
+  border: none;
+  background: none;
+  width: 2.75rem;
+  font-size: 1.3rem;
+  line-height: 1;
   color: var(--c-oro-scuro);
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.stepper input {
+  width: 3.5rem;
+  border: none;
+  border-left: 1px solid var(--c-oro);
+  border-right: 1px solid var(--c-oro);
+  border-radius: 0;
+  text-align: center;
+  padding: var(--sp-2) 0;
+  -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.riga-ospite {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: var(--sp-2);
+  align-items: center;
+  margin-top: var(--sp-2);
+}
+
+/* Pulsante "bambino" a fianco di ogni accompagnatore: adulto di default */
+.toggle-bambino {
+  border: 1px solid var(--c-oro-scuro);
+  background: var(--c-bianco);
+  border-radius: 999px;
+  padding: var(--sp-1) var(--sp-3);
+  cursor: pointer;
+  color: var(--c-oro-scuro);
+  font-size: 0.85rem;
   white-space: nowrap;
 }
 
-.rimuovi-ospite {
-  border: none;
-  background: none;
-  color: #b23b3b;
-  font-size: 1.2rem;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.aggiungi-riga {
-  display: flex;
-  gap: var(--sp-2);
-  margin-top: var(--sp-1);
-}
-
-.aggiungi-riga button {
-  border: 1px dashed var(--c-oro-scuro);
-  background: none;
-  border-radius: 6px;
-  padding: var(--sp-1) var(--sp-2);
-  cursor: pointer;
-  color: var(--c-oro-scuro);
+.toggle-bambino.attivo {
+  background: var(--c-oro);
+  color: var(--c-bianco);
+  border-color: var(--c-oro);
 }
 
 .rsvp-errore {

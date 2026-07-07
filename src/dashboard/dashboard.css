@@ -360,6 +360,66 @@
   border-radius: 4px;
 }
 
+/* ── Eliminazione invitati / accompagnatori ── */
+.elimina-invitato-btn {
+  border: 1px solid var(--c-rosso-elimina);
+  color: var(--c-rosso-elimina);
+  background: white;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.elimina-invitato-btn:hover:not(:disabled) {
+  background: var(--c-rosso-elimina);
+  color: white;
+}
+
+.elimina-invitato-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.lista-accompagnatori {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95rem;
+}
+
+.lista-accompagnatori li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 1px 0;
+}
+
+.elimina-accompagnatore {
+  border: none;
+  background: none;
+  color: var(--c-rosso-elimina);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.elimina-accompagnatore:hover:not(:disabled) {
+  background: #fdf2f2;
+}
+
+.elimina-accompagnatore:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Pulsante manuale */
 .manuale-btn-container {
   padding: var(--sp-3);
@@ -587,6 +647,35 @@
 .rimuovi-x:hover {
   background: #c0392b;
   transform: scale(1.1);
+}
+
+/* ── Popup di avviso (tavolo diverso / non accanto) ── */
+.modale-header-avviso {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.modale-header-avviso h3::before {
+  content: "⚠️";
+  margin-right: 8px;
+}
+
+.avviso-messaggio {
+  color: var(--c-testo);
+  line-height: 1.5;
+  padding: var(--sp-2) var(--sp-3);
+  background: #fff9e6;
+  border-left: 3px solid #f39c12;
+  border-radius: 4px;
+  margin-bottom: var(--sp-2);
+}
+
+.avviso-nota {
+  color: var(--c-oro-scuro);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: var(--sp-2);
 }
 
 /* ── Modali ── */
