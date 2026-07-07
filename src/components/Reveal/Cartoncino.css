@@ -31,11 +31,30 @@
 
 .schermo-cornice-oro {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Altezza legata al viewport DINAMICO: la cornice abbraccia lo schermo
+     realmente visibile, non l'area sotto la barra di Safari/browser mobile.
+     Così il bordo inferiore resta sempre appena sopra la barra del browser
+     e il contenuto non "sbuca" più sotto la cornice in basso. */
+  height: 100dvh;
   border: 14px solid var(--c-oro); /* Cornice più spessa (14px invece di 5px) */
   pointer-events: none;
   z-index: 9999;
   animation: oro-shimmer 4s ease-in-out infinite;
+}
+
+/* Tappo panna sotto la barra del browser mobile: copre l'eventuale striscia
+   di contenuto tra il bordo inferiore della cornice e la barra di Safari. */
+.schermo-cornice-oro::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 100dvh;
+  bottom: -100vh;
+  background: #faf6eb;
 }
 
 /* ── Transizione Elegante con Bagliore Espansivo ── */

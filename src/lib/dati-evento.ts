@@ -30,8 +30,8 @@ export const chiesa = {
 export const location = {
   nome: "Villa San Michele",
   indirizzo: "Via dei Fontanoni 4, Ripalta Cremasca (CR)",
-  // DA CONFERMARE: il PDF dice solo "dopo la cerimonia", nessun orario esatto.
-  orario: "a seguire — DA CONFERMARE",
+  // Il PDF dice solo "dopo la cerimonia", nessun orario esatto.
+  orario: "a seguire",
 };
 
 /** Link Maps costruito dall'indirizzo reale (query standard Google Maps). */

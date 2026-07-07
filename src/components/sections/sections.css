@@ -111,6 +111,14 @@
   color: var(--c-bianco);
 }
 
+/* ── Mobile: riduciamo lo spazio verticale tra le sezioni (es. villa → RSVP) ── */
+@media (max-width: 600px) {
+  .sezione {
+    padding-top: var(--sp-4);
+    padding-bottom: var(--sp-4);
+  }
+}
+
 /* ── Mobile: i nomi lunghi non stanno su una riga sola, li impiliamo ── */
 @media (max-width: 600px) {
   .hero-nomi {

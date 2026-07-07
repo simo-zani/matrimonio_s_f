@@ -64,6 +64,14 @@ textarea:focus {
   gap: var(--sp-2);
 }
 
+/* Le colonne di una griglia non si restringono sotto la larghezza intrinseca
+   dell'input (min-width: auto): senza questo, il campo "Cognome" sfora a destra
+   dello schermo su mobile. */
+.riga-nome-cognome input,
+.riga-ospite input {
+  min-width: 0;
+}
+
 /* Selettore numero accompagnatori con frecce + input */
 .stepper {
   display: inline-flex;
@@ -113,6 +121,14 @@ textarea:focus {
   gap: var(--sp-2);
   align-items: center;
   margin-top: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  /* Riga sottile che separa un accompagnatore dal successivo */
+  border-bottom: 1px solid rgba(163, 133, 63, 0.25);
+}
+
+.riga-ospite:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* Pulsante "bambino" a fianco di ogni accompagnatore: adulto di default */
@@ -140,7 +156,7 @@ textarea:focus {
   }
   .riga-ospite .toggle-bambino {
     grid-column: 1 / -1;
-    justify-self: start;
+    justify-self: center;
   }
 }
 
