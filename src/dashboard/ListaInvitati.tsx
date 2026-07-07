@@ -12,6 +12,10 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
   const [inCorso, setInCorso] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
   const [invitatoDaEliminare, setInvitatoDaEliminare] = useState<DBRsvp | null>(null);
+  const [accompagnatoreElimina, setAccompagnatoreElimina] = useState<{
+    rsvp: DBRsvp;
+    idx: number;
+  } | null>(null);
 
   async function eseguiEliminaInvitato(r: DBRsvp) {
     setInCorso(true);
@@ -30,9 +34,7 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
     setInvitatoDaEliminare(r);
   }
 
-  async function eliminaAccompagnatore(r: DBRsvp, idx: number) {
-    const g = r.guests[idx];
-    if (!confirm(`Eliminare l'accompagnatore "${g.nome} ${g.cognome}"?`)) return;
+  async function eseguiEliminaAccompagnatore(r: DBRsvp, idx: number) {
     setInCorso(true);
     setErrore(null);
     try {
@@ -43,6 +45,10 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
     } finally {
       setInCorso(false);
     }
+  }
+
+  function eliminaAccompagnatore(r: DBRsvp, idx: number) {
+    setAccompagnatoreElimina({ rsvp: r, idx });
   }
 
   // Calcolo statistiche
@@ -76,7 +82,8 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
   const totaleOspitiPresenti = totaleAdulti + totaleBambini;
 
   return (
-    <div className="invitati-sezione">
+    <>
+      <div className="invitati-sezione">
       {/* ── Statistiche in evidenza ── */}
       <div className="stat-grid">
         <div className="stat-card">
@@ -229,6 +236,20 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
           }}
         />
       )}
-    </div>
+
+      {accompagnatoreElimina && (
+        <ModaleConferma
+          titolo="Elimina Accompagnatore"
+          messaggio={`Eliminare "${accompagnatoreElimina.rsvp.guests[accompagnatoreElimina.idx]?.nome} ${accompagnatoreElimina.rsvp.guests[accompagnatoreElimina.idx]?.cognome}" dalla lista degli accompagnatori?`}
+          testoConferma="Elimina"
+          onAnnulla={() => setAccompagnatoreElimina(null)}
+          onConferma={() => {
+            const { rsvp, idx } = accompagnatoreElimina;
+            setAccompagnatoreElimina(null);
+            eseguiEliminaAccompagnatore(rsvp, idx);
+          }}
+        />
+      )}
+    </>
   );
 }
