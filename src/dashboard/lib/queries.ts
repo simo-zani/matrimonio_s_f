@@ -209,9 +209,14 @@ export async function rimuoviPosto(posto_id: string) {
  */
 export async function cancellaRsvp(id: string) {
   // Prima libera gli eventuali posti collegati, poi elimina la risposta.
-  await supabase.from("posti").delete().eq("rsvp_id", id);
+  const { error: errPosti } = await supabase.from("posti").delete().eq("rsvp_id", id);
+  if (errPosti) console.error("[cancellaRsvp] Errore eliminazione posti:", errPosti);
+
   const { error } = await supabase.from("rsvp").delete().eq("id", id);
-  if (error) throw new Error("Impossibile eliminare l'invitato: " + error.message);
+  if (error) {
+    console.error("[cancellaRsvp] Errore eliminazione rsvp:", error);
+    throw new Error("Impossibile eliminare l'invitato: " + error.message);
+  }
 }
 
 /**
@@ -255,21 +260,21 @@ export async function rimuoviAccompagnatore(rsvp: DBRsvp, guestIndex: number) {
 }
 
 /**
- * Crea un nuovo invitato manuale nel database (scritto direttamente in rsvp
- * con is_compiler: true per poterlo sistemare in seguito).
+ * Crea un nuovo invitato manuale nel database.
+ * Il campo `guests` contiene solo i veri accompagnatori (niente is_compiler).
  */
 export async function creaInvitatoManuale(
   nome: string,
   cognome: string,
-  tipo: "adulto" | "bambino",
-  allergie: string | null
+  allergie: string | null,
+  accompagnatori: { nome: string; cognome: string; tipo: "adulto" | "bambino" }[] = []
 ): Promise<DBRsvp> {
   const { data, error } = await supabase
     .from("rsvp")
     .insert({
       nome_contatto: `${nome.trim()} ${cognome.trim()}`,
       presenza: true,
-      guests: [{ nome: nome.trim(), cognome: cognome.trim(), tipo, is_compiler: true }],
+      guests: accompagnatori,
       allergie: allergie ? allergie.trim() : null,
     })
     .select()

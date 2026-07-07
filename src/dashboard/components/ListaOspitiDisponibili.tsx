@@ -31,16 +31,12 @@ export function ListaOspitiDisponibili({
       const nome = parti[0] || "";
       const cognome = parti.slice(1).join(" ") || "(Compilatore)";
 
-      // Controlla se c'è un ospite nell'array guests contrassegnato come compilatore
-      const compilerGuest = r.guests?.find((g: any) => g.is_compiler);
-      const compilerTipo = compilerGuest ? compilerGuest.tipo : "adulto";
-
       ospitiRsvp.push({
         rsvp_id: r.id,
         rsvp_guest_index: -1,
         nome,
         cognome,
-        tipo: compilerTipo,
+        tipo: "adulto",
         allergie: r.allergie || null,
         fonte: "rsvp",
       });
@@ -48,8 +44,6 @@ export function ListaOspitiDisponibili({
       // 2. Accompagnatori
       if (r.guests && Array.isArray(r.guests)) {
         r.guests.forEach((g, idx) => {
-          // Salta l'accompagnatore fittizio che rappresenta il compilatore manuale
-          if ((g as any).is_compiler) return;
           ospitiRsvp.push({
             rsvp_id: r.id,
             rsvp_guest_index: idx,

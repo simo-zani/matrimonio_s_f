@@ -165,10 +165,13 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
                     </td>
                     <td>
                       {r.presenza ? (
-                        r.guests && r.guests.length > 0 ? (
+                        r.guests && r.guests.filter((g) => !(g as any).is_compiler).length > 0 ? (
                           <ul className="lista-accompagnatori">
-                            {r.guests.map((g, idx) => (
-                              <li key={idx}>
+                            {r.guests
+                              .map((g, originalIdx) => ({ g, originalIdx }))
+                              .filter(({ g }) => !(g as any).is_compiler)
+                              .map(({ g, originalIdx }) => (
+                              <li key={originalIdx}>
                                 <span>
                                   {g.nome} {g.cognome}{" "}
                                   <span style={{ fontSize: "0.75rem", color: "var(--c-oro-scuro)" }}>
@@ -180,7 +183,7 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
                                   className="elimina-accompagnatore"
                                   title="Elimina accompagnatore"
                                   disabled={inCorso}
-                                  onClick={() => eliminaAccompagnatore(r, idx)}
+                                  onClick={() => eliminaAccompagnatore(r, originalIdx)}
                                 >
                                   ✕
                                 </button>

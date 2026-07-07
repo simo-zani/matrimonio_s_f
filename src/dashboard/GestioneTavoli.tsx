@@ -232,11 +232,11 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
   async function handleAggiungiManuale(
     nome: string,
     cognome: string,
-    tipo: "adulto" | "bambino",
-    allergie: string | null
+    allergie: string | null,
+    accompagnatori: { nome: string; cognome: string; tipo: "adulto" | "bambino" }[]
   ) {
     try {
-      await creaInvitatoManuale(nome, cognome, tipo, allergie);
+      await creaInvitatoManuale(nome, cognome, allergie, accompagnatori);
       await onAggiorna();
       setMostraManuale(false);
     } catch (e: any) {
