@@ -488,13 +488,21 @@
 /* ── Canvas Centrale ── */
 .canvas-container {
   background-color: #f7f5f2;
-  /* Pattern a scacchiera per simulare griglia */
+  position: relative;
+  overflow: hidden; /* Nasconde le scrollbar per usare il trascinamento grab-to-pan */
+  height: 100%;
+}
+
+.canvas-sheet {
+  position: absolute;
+  width: 3000px;
+  height: 3000px;
+  left: 0;
+  top: 0;
+  /* Grid pattern spostato sul foglio così si muove e zooma con i tavoli */
   background-image: 
     radial-gradient(rgba(197, 185, 172, 0.25) 1px, transparent 1px);
   background-size: 24px 24px;
-  position: relative;
-  overflow: auto;
-  height: 100%;
 }
 
 .tavolo-contenitore {
@@ -510,10 +518,24 @@
 
 /* ── Forme dei Tavoli ── */
 
-/* TAVOLO TONDO */
+/* TAVOLO CERCHIO */
 .tavolo-cerchio {
-  background: white;
-  border: 2px solid var(--c-oro-scuro);
+  background: #f4edd6;
+  border: 2px solid var(--c-oro);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.95rem;
+  padding: var(--sp-1);
+}
+
+/* TAVOLO TONDO */
+.tavolo-tondo {
+  background: #f4edd6;
+  border: 2px solid var(--c-oro);
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
@@ -526,8 +548,8 @@
 
 /* TAVOLO QUADRATO */
 .tavolo-quadrato {
-  background: white;
-  border: 2px solid var(--c-oro-scuro);
+  background: #f4edd6;
+  border: 2px solid var(--c-oro);
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
@@ -540,8 +562,8 @@
 
 /* TAVOLO ELLISSE */
 .tavolo-ellisse {
-  background: white;
-  border: 2px solid var(--c-oro-scuro);
+  background: #f4edd6;
+  border: 2px solid var(--c-oro);
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
@@ -554,8 +576,8 @@
 
 /* TAVOLO IMPERIALE */
 .tavolo-imperiale {
-  background: white;
-  border: 2px solid var(--c-oro-scuro);
+  background: #f4edd6;
+  border: 2px solid var(--c-oro);
   box-shadow: 0 4px 10px rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
@@ -566,10 +588,86 @@
   padding: var(--sp-1);
 }
 
-/* Colore Sposi */
+/* Colore Sposi (oro reale Premium) */
 .tavolo-sposi {
   background: var(--c-oro) !important;
+  border-color: var(--c-oro-scuro) !important;
   color: white !important;
+  box-shadow: 0 6px 15px rgba(163, 133, 63, 0.25) !important;
+}
+
+/* Drag Over Highlights */
+.tavolo-tondo.drag-over,
+.tavolo-cerchio.drag-over,
+.tavolo-quadrato.drag-over,
+.tavolo-ellisse.drag-over,
+.tavolo-imperiale.drag-over {
+  background: #eafaf0 !important;
+  border-color: #2ecc71 !important;
+  box-shadow: 0 0 0 5px rgba(46, 204, 113, 0.25) !important;
+}
+
+.sedia-vuota.drag-over {
+  background: #2ecc71 !important;
+  color: white !important;
+  transform: scale(1.15) translate(-50%, -50%);
+  box-shadow: 0 0 0 5px rgba(46, 204, 113, 0.3);
+}
+
+/* Controlli di Zoom Floating */
+.zoom-controls {
+  position: absolute;
+  bottom: var(--sp-4);
+  left: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: white;
+  border: 1px solid var(--c-oro);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(74, 64, 56, 0.08);
+  z-index: 100;
+}
+
+.zoom-controls button {
+  background: transparent;
+  border: none;
+  color: var(--c-testo);
+  font-weight: bold;
+  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.zoom-controls button:hover {
+  background: var(--c-panna);
+  color: var(--c-oro-scuro);
+}
+
+.zoom-percentage {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-testo);
+  min-width: 48px;
+  text-align: center;
+  user-select: none;
+}
+
+.zoom-reset-btn {
+  font-size: 0.8rem !important;
+  width: auto !important;
+  padding: 0 8px !important;
+  font-weight: 600 !important;
+  border-left: 1px solid #f2ece1 !important;
+  border-radius: 0 !important;
 }
 
 /* Highlight azzurro */

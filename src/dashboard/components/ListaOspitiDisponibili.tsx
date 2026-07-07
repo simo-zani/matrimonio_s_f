@@ -31,12 +31,16 @@ export function ListaOspitiDisponibili({
       const nome = parti[0] || "";
       const cognome = parti.slice(1).join(" ") || "(Compilatore)";
 
+      // Controlla se c'è un ospite nell'array guests contrassegnato come compilatore
+      const compilerGuest = r.guests?.find((g: any) => g.is_compiler);
+      const compilerTipo = compilerGuest ? compilerGuest.tipo : "adulto";
+
       ospitiRsvp.push({
         rsvp_id: r.id,
         rsvp_guest_index: -1,
         nome,
         cognome,
-        tipo: "adulto",
+        tipo: compilerTipo,
         allergie: r.allergie || null,
         fonte: "rsvp",
       });
@@ -44,6 +48,8 @@ export function ListaOspitiDisponibili({
       // 2. Accompagnatori
       if (r.guests && Array.isArray(r.guests)) {
         r.guests.forEach((g, idx) => {
+          // Salta l'accompagnatore fittizio che rappresenta il compilatore manuale
+          if ((g as any).is_compiler) return;
           ospitiRsvp.push({
             rsvp_id: r.id,
             rsvp_guest_index: idx,
@@ -74,7 +80,7 @@ export function ListaOspitiDisponibili({
   return (
     <div className="sidebar-disponibili">
       <div className="sidebar-header">
-        <h3>Ospiti da Sistemare ({ospitiDisponibili.length})</h3>
+        <h3>Invitati da Sistemare ({ospitiDisponibili.length})</h3>
         <input
           type="text"
           className="disponibili-search"
@@ -101,6 +107,11 @@ export function ListaOspitiDisponibili({
                 key={idx}
                 className={`riga-disponibile ${isSel ? "selezionato" : ""}`}
                 onClick={() => onSelezionaOspite(isSel ? null : g)}
+                draggable={true}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData("application/json", JSON.stringify(g));
+                  onSelezionaOspite(g);
+                }}
               >
                 <div className="riga-ospite-info">
                   <span className="ospite-nome">
@@ -117,7 +128,7 @@ export function ListaOspitiDisponibili({
 
       <div className="manuale-btn-container">
         <button type="button" className="aggiungi-manuale-btn" onClick={onApriModaleManuale}>
-          + Aggiungi Ospite Manuale
+          + Aggiungi Invitato Manuale
         </button>
       </div>
     </div>

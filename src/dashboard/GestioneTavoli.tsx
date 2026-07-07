@@ -6,12 +6,14 @@ import {
   aggiornaPosizioneTavolo,
   assegnaPosto,
   rimuoviPosto,
+  creaInvitatoManuale,
 } from "./lib/queries";
 import { TavoloCerchio } from "./components/TavoloCerchio";
 import { ListaOspitiDisponibili } from "./components/ListaOspitiDisponibili";
 import { ModaleNuovoTavolo } from "./components/ModaleNuovoTavolo";
 import { ModaleOspiteManuale } from "./components/ModaleOspiteManuale";
 import { ModaleAvviso } from "./components/ModaleAvviso";
+import { ModaleConferma } from "./components/ModaleConferma";
 import "./dashboard.css";
 
 /**
@@ -66,6 +68,54 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
     messaggi: string[];
     onConferma: () => void;
   } | null>(null);
+  const [tavoloDaEliminare, setTavoloDaEliminare] = useState<string | null>(null);
+  const [tavoliEspansi, setTavoliEspansi] = useState<Record<string, boolean>>({});
+
+  const toggleTavoloEspanso = (tavoloId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTavoliEspansi((prev) => ({
+      ...prev,
+      [tavoloId]: !prev[tavoloId],
+    }));
+  };
+
+  // Stati per Zoom e Pan del foglio
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Permetti il trascinamento del foglio solo se clicchi direttamente sullo sfondo
+    if ((e.target as HTMLElement).classList.contains("canvas-container")) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (isPanning) {
+      setPan({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (isPanning) {
+      setIsPanning(false);
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const zoomIn = () => setZoom((z) => Math.min(2, z + 0.1));
+  const zoomOut = () => setZoom((z) => Math.max(0.5, z - 0.1));
+  const resetZoom = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
 
   // ── Crea un nuovo tavolo ──
   async function handleCreaTavolo(nome: string, capienza: number, forma: DBTable["forma"]) {
@@ -79,10 +129,7 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
   }
 
   // ── Cancella tavolo ──
-  async function handleCancellaTavolo(id: string) {
-    const tavolo = tavoli.find((t) => t.id === id);
-    if (!tavolo) return;
-    if (!confirm(`Cancellare il tavolo "${tavolo.nome}"? Tutti i posti assegnati verranno liberati.`)) return;
+  async function eseguiCancellaTavolo(id: string) {
     try {
       await cancellaTavolo(id);
       if (tavoloEvidenziato === id) setTavoloEvidenziato(null);
@@ -90,6 +137,10 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
     } catch (e: any) {
       setErrore(e.message);
     }
+  }
+
+  function handleCancellaTavolo(id: string) {
+    setTavoloDaEliminare(id);
   }
 
   // ── Aggiorna posizione tavolo dopo il drag ──
@@ -103,8 +154,9 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
   );
 
   // ── Assegna ospite selezionato a una sedia ──
-  async function handleAssegna(tavoloId: string, sediaIndex: number) {
-    if (!ospiteSelezionato) return;
+  async function handleAssegna(tavoloId: string, sediaIndex: number, ospiteDaAssegnare?: any) {
+    const targetOspite = ospiteDaAssegnare || ospiteSelezionato;
+    if (!targetOspite) return;
 
     // L'assegnazione vera e propria (eseguita subito o dopo conferma dell'avviso)
     const esegui = async () => {
@@ -112,16 +164,18 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
       try {
         await assegnaPosto(
           tavoloId,
-          ospiteSelezionato.nome,
-          ospiteSelezionato.cognome,
-          ospiteSelezionato.tipo,
-          ospiteSelezionato.allergie || null,
-          ospiteSelezionato.fonte,
-          ospiteSelezionato.rsvp_id || null,
-          ospiteSelezionato.rsvp_guest_index !== undefined ? ospiteSelezionato.rsvp_guest_index : null,
+          targetOspite.nome,
+          targetOspite.cognome,
+          targetOspite.tipo,
+          targetOspite.allergie || null,
+          targetOspite.fonte,
+          targetOspite.rsvp_id || null,
+          targetOspite.rsvp_guest_index !== undefined ? targetOspite.rsvp_guest_index : null,
           sediaIndex
         );
-        setOspiteSelezionato(null);
+        if (ospiteSelezionato && ospiteSelezionato.rsvp_id === targetOspite.rsvp_id && ospiteSelezionato.rsvp_guest_index === targetOspite.rsvp_guest_index) {
+          setOspiteSelezionato(null);
+        }
         await onAggiorna();
       } catch (e: any) {
         setErrore(e.message);
@@ -130,13 +184,8 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
 
     // ── Controlli sul nucleo (solo ospiti da RSVP: i manuali non hanno nucleo) ──
     // Un solo avviso alla volta, mutuamente esclusivi:
-    //  · se al tavolo scelto NON ci sono membri del nucleo ma ce ne sono altrove
-    //    → avviso "tavolo diverso" (inutile parlare di vicinanza, è ovvio che sia lontano);
-    //  · se al tavolo scelto ci sono già membri del nucleo ma la sedia non è
-    //    accanto a nessuno di loro → avviso "non accanto";
-    //  · se è accanto ad almeno uno (o è il primo del nucleo) → nessun avviso.
     let messaggio: string | null = null;
-    const rsvpId = ospiteSelezionato.rsvp_id;
+    const rsvpId = targetOspite.rsvp_id;
     if (rsvpId) {
       const membriNucleo = posti.filter((p) => p.rsvp_id === rsvpId);
       const membriStessoTavolo = membriNucleo.filter((p) => p.tavolo_id === tavoloId);
@@ -179,17 +228,15 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
     }
   }
 
-  // ── Aggiunge ospite manuale dal modale ──
+  // ── Aggiunge invitato manuale dal modale ──
   async function handleAggiungiManuale(
     nome: string,
     cognome: string,
     tipo: "adulto" | "bambino",
-    allergie: string | null,
-    tavoloId: string,
-    sediaIndex: number
+    allergie: string | null
   ) {
     try {
-      await assegnaPosto(tavoloId, nome, cognome, tipo, allergie, "manuale", null, null, sediaIndex);
+      await creaInvitatoManuale(nome, cognome, tipo, allergie);
       await onAggiorna();
       setMostraManuale(false);
     } catch (e: any) {
@@ -209,42 +256,70 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
       />
 
       {/* ── Canvas Centrale: Piano dei Tavoli ── */}
-      <div className="canvas-container" onClick={() => setOspiteSelezionato(null)}>
-        {/* Istruzioni quando nessun tavolo presente */}
-        {tavoli.length === 0 && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", alignItems: "center",
-            justifyContent: "center", flexDirection: "column", gap: "var(--sp-3)",
-            color: "var(--c-oro-scuro)", pointerEvents: "none"
-          }}>
-            <p style={{ fontSize: "1.2rem", fontFamily: "var(--f-titolo)" }}>Nessun tavolo creato</p>
-            <p style={{ fontSize: "0.9rem" }}>Usa il pulsante "＋ Nuovo Tavolo" in basso a destra →</p>
-          </div>
-        )}
+      <div
+        className="canvas-container"
+        onClick={() => setOspiteSelezionato(null)}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        style={{
+          cursor: isPanning ? "grabbing" : "grab",
+        }}
+      >
+        {/* Foglio dei tavoli (scollabile e zoommabile) */}
+        <div
+          className="canvas-sheet"
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {/* Istruzioni quando nessun tavolo presente */}
+          {tavoli.length === 0 && (
+            <div style={{
+              position: "absolute", inset: 0, display: "flex", alignItems: "center",
+              justifyContent: "center", flexDirection: "column", gap: "var(--sp-3)",
+              color: "var(--c-oro-scuro)", pointerEvents: "none"
+            }}>
+              <p style={{ fontSize: "1.2rem", fontFamily: "var(--f-titolo)" }}>Nessun tavolo creato</p>
+              <p style={{ fontSize: "0.9rem" }}>Usa il pulsante "＋ Nuovo Tavolo" in basso a destra →</p>
+            </div>
+          )}
 
-        {tavoli.map((tavolo) => {
-          const ospitiTavolo = posti.filter((p) => p.tavolo_id === tavolo.id);
-          return (
-            <TavoloCerchio
-              key={tavolo.id}
-              tavolo={tavolo}
-              ospiti={ospitiTavolo}
-              evidenziato={tavoloEvidenziato === tavolo.id}
-              ospiteSelezionato={ospiteSelezionato}
-              onAssegna={handleAssegna}
-              onRimuovi={handleRimuovi}
-              onDragEnd={handleDragEnd}
-              onEvidenzia={() => setTavoloEvidenziato(tavolo.id)}
-            />
-          );
-        })}
+          {tavoli.map((tavolo) => {
+            const ospitiTavolo = posti.filter((p) => p.tavolo_id === tavolo.id);
+            return (
+              <TavoloCerchio
+                key={tavolo.id}
+                tavolo={tavolo}
+                ospiti={ospitiTavolo}
+                evidenziato={tavoloEvidenziato === tavolo.id}
+                ospiteSelezionato={ospiteSelezionato}
+                onAssegna={handleAssegna}
+                onRimuovi={handleRimuovi}
+                onDragEnd={handleDragEnd}
+                onEvidenzia={() => setTavoloEvidenziato(tavolo.id)}
+                zoom={zoom}
+              />
+            );
+          })}
+        </div>
+
+        {/* Controlli di Zoom in basso a sinistra */}
+        <div className="zoom-controls" onClick={(e) => e.stopPropagation()}>
+          <button type="button" onClick={zoomIn} title="Ingrandisci">＋</button>
+          <span className="zoom-percentage">{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={zoomOut} title="Rimpicciolisci">－</button>
+          <button type="button" onClick={resetZoom} className="zoom-reset-btn">Reset</button>
+        </div>
 
         {/* Pulsante nuovo tavolo (basso destra del canvas) */}
         <button
           className="nuovo-tavolo-btn"
           style={{
             position: "absolute", bottom: "var(--sp-4)", right: "var(--sp-4)",
-            width: "auto", padding: "var(--sp-2) var(--sp-4)"
+            width: "auto", padding: "var(--sp-2) var(--sp-4)",
+            zIndex: 10
           }}
           onClick={(e) => { e.stopPropagation(); setMostraNuovoTavolo(true); }}
         >
@@ -265,26 +340,140 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
             </p>
           ) : (
             tavoli.map((t) => {
-              const occupati = posti.filter((p) => p.tavolo_id === t.id).length;
+              const ospitiTavolo = posti.filter((p) => p.tavolo_id === t.id);
+              const occupati = ospitiTavolo.length;
+              const espanso = !!tavoliEspansi[t.id];
+
               return (
                 <div
                   key={t.id}
-                  className={`riga-tavolo-sidebar ${tavoloEvidenziato === t.id ? "evidenziato" : ""}`}
-                  onClick={() => setTavoloEvidenziato(t.id === tavoloEvidenziato ? null : t.id)}
+                  className={`riga-tavolo-sidebar-container ${tavoloEvidenziato === t.id ? "evidenziato" : ""}`}
+                  style={{
+                    marginBottom: "8px",
+                    borderRadius: "6px",
+                    border: "1px solid #f2ece1",
+                    overflow: "hidden",
+                    background: tavoloEvidenziato === t.id ? "#e1f5fe" : "white",
+                    transition: "all 0.2s ease",
+                  }}
                 >
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{t.nome}</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--c-oro-scuro)" }}>
-                      {occupati}/{t.capienza} posti · {t.forma}
-                    </div>
-                  </div>
-                  <button
-                    className="sidebar-cancella-tavolo-btn"
-                    title="Cancella tavolo"
-                    onClick={(e) => { e.stopPropagation(); handleCancellaTavolo(t.id); }}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setTavoloEvidenziato(t.id === tavoloEvidenziato ? null : t.id)}
                   >
-                    ✕
-                  </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <button
+                        type="button"
+                        onClick={(e) => toggleTavoloEspanso(t.id, e)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
+                          fontSize: "0.8rem",
+                          color: "var(--c-oro-scuro)",
+                          display: "flex",
+                          alignItems: "center",
+                          transform: espanso ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                          width: "16px",
+                          height: "16px",
+                          justifyContent: "center"
+                        }}
+                        aria-label="Espandi tavolo"
+                      >
+                        ▶
+                      </button>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: "0.95rem" }}>{t.nome}</div>
+                        <div style={{ fontSize: "0.78rem", color: "var(--c-oro-scuro)" }}>
+                          {occupati}/{t.capienza} posti · {t.forma}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className="sidebar-cancella-tavolo-btn"
+                      title="Cancella tavolo"
+                      onClick={(e) => { e.stopPropagation(); handleCancellaTavolo(t.id); }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {espanso && (
+                    <div
+                      className="tavolo-lista-seduti"
+                      style={{
+                        padding: "4px 12px 10px 32px",
+                        borderTop: "1px solid #fdfbf7",
+                        background: tavoloEvidenziato === t.id ? "#f3faff" : "#faf8f5",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "6px",
+                      }}
+                    >
+                      {ospitiTavolo.length === 0 ? (
+                        <div style={{ fontSize: "0.8rem", color: "var(--c-oro-scuro)", fontStyle: "italic" }}>
+                          Nessun invitato seduto
+                        </div>
+                      ) : (
+                        ospitiTavolo.map((ospite) => {
+                          const sIndex = ospite.sedia_index !== null && ospite.sedia_index !== undefined ? ospite.sedia_index : ospite.rsvp_guest_index;
+                          return (
+                            <div
+                              key={ospite.id}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                fontSize: "0.85rem",
+                                padding: "2px 0",
+                              }}
+                            >
+                              <span style={{ fontWeight: 500 }}>
+                                {ospite.nome} {ospite.cognome}
+                                {ospite.tipo === "bambino" && (
+                                  <span style={{ fontSize: "0.75rem", color: "var(--c-oro-scuro)", marginLeft: "4px" }}>
+                                    (bambino)
+                                  </span>
+                                )}
+                              </span>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ fontSize: "0.72rem", color: "var(--c-oro-scuro)", background: "#eee", padding: "1px 4px", borderRadius: "3px" }}>
+                                  Sedia {sIndex !== null && sIndex !== undefined ? sIndex + 1 : "?"}
+                                </span>
+                                <button
+                                  type="button"
+                                  title="Rimuovi dal tavolo"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRimuovi(ospite.id);
+                                  }}
+                                  style={{
+                                    border: "none",
+                                    background: "none",
+                                    color: "var(--c-rosso-elimina)",
+                                    cursor: "pointer",
+                                    fontSize: "0.9rem",
+                                    padding: "0 2px",
+                                    lineHeight: 1,
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -300,13 +489,26 @@ export function GestioneTavoli({ rsvps, tavoli, posti, onAggiorna }: GestioneTav
         />
       )}
 
-      {/* ── Modale Ospite Manuale ── */}
+      {/* ── Modale Invitato Manuale ── */}
       {mostraManuale && (
         <ModaleOspiteManuale
-          tavoli={tavoli}
-          posti={posti}
           onChiudi={() => setMostraManuale(false)}
           onSalva={handleAggiungiManuale}
+        />
+      )}
+
+      {/* ── Modale Conferma Cancellazione Tavolo ── */}
+      {tavoloDaEliminare && (
+        <ModaleConferma
+          titolo="Elimina Tavolo"
+          messaggio={`Cancellare il tavolo "${tavoli.find((t) => t.id === tavoloDaEliminare)?.nome}"? Tutti i posti assegnati verranno liberati.`}
+          testoConferma="Elimina"
+          onAnnulla={() => setTavoloDaEliminare(null)}
+          onConferma={() => {
+            const id = tavoloDaEliminare;
+            setTavoloDaEliminare(null);
+            eseguiCancellaTavolo(id);
+          }}
         />
       )}
 

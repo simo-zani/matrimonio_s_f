@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cancellaRsvp, rimuoviAccompagnatore, type DBRsvp } from "./lib/queries";
+import { ModaleConferma } from "./components/ModaleConferma";
 import "./dashboard.css";
 
 interface ListaInvitatiProps {
@@ -10,14 +11,9 @@ interface ListaInvitatiProps {
 export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
   const [inCorso, setInCorso] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  const [invitatoDaEliminare, setInvitatoDaEliminare] = useState<DBRsvp | null>(null);
 
-  async function eliminaInvitato(r: DBRsvp) {
-    if (
-      !confirm(
-        `Eliminare definitivamente "${r.nome_contatto}" e tutti i suoi accompagnatori? I posti assegnati verranno liberati.`
-      )
-    )
-      return;
+  async function eseguiEliminaInvitato(r: DBRsvp) {
     setInCorso(true);
     setErrore(null);
     try {
@@ -28,6 +24,10 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
     } finally {
       setInCorso(false);
     }
+  }
+
+  function eliminaInvitato(r: DBRsvp) {
+    setInvitatoDaEliminare(r);
   }
 
   async function eliminaAccompagnatore(r: DBRsvp, idx: number) {
@@ -215,6 +215,20 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
           </tbody>
         </table>
       </div>
+
+      {invitatoDaEliminare && (
+        <ModaleConferma
+          titolo="Elimina Invitato"
+          messaggio={`Eliminare definitivamente "${invitatoDaEliminare.nome_contatto}" e tutti i suoi accompagnatori? I posti assegnati verranno liberati.`}
+          testoConferma="Elimina"
+          onAnnulla={() => setInvitatoDaEliminare(null)}
+          onConferma={() => {
+            const r = invitatoDaEliminare;
+            setInvitatoDaEliminare(null);
+            eseguiEliminaInvitato(r);
+          }}
+        />
+      )}
     </div>
   );
 }

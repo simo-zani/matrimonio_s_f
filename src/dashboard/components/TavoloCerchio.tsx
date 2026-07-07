@@ -7,10 +7,11 @@ interface TavoloCerchioProps {
   ospiti: DBSeat[]; // Posti occupati in questo tavolo
   evidenziato: boolean;
   ospiteSelezionato: any | null; // Ospite selezionato nella sidebar
-  onAssegna: (tavoloId: string, sediaIndex: number) => void;
+  onAssegna: (tavoloId: string, sediaIndex: number, ospiteDaAssegnare?: any) => void;
   onRimuovi: (postoId: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
   onEvidenzia: () => void;
+  zoom: number;
 }
 
 export function TavoloCerchio({
@@ -22,6 +23,7 @@ export function TavoloCerchio({
   onRimuovi,
   onDragEnd,
   onEvidenzia,
+  zoom,
 }: TavoloCerchioProps) {
   const isSposi = tavolo.nome.toLowerCase() === "sposi";
 
@@ -135,8 +137,10 @@ export function TavoloCerchio({
       drag
       dragMomentum={false}
       onDragEnd={(_, info) => {
-        // Salva le nuove coordinate (aggiungendo la differenza traslata)
-        onDragEnd(tavolo.id, tavolo.pos_x + info.delta.x, tavolo.pos_y + info.delta.y);
+        // Salva le nuove coordinate dividendo lo spostamento per lo zoom corrente
+        const deltaX = info.offset.x / zoom;
+        const deltaY = info.offset.y / zoom;
+        onDragEnd(tavolo.id, Math.round(tavolo.pos_x + deltaX), Math.round(tavolo.pos_y + deltaY));
       }}
       onPointerDown={onEvidenzia}
       className="tavolo-contenitore"
@@ -156,16 +160,63 @@ export function TavoloCerchio({
           width: "100%",
           height: "100%",
           borderRadius: borderRadius,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "2px",
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.currentTarget.classList.add("drag-over");
+        }}
+        onDragLeave={(e) => {
+          e.currentTarget.classList.remove("drag-over");
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.currentTarget.classList.remove("drag-over");
+          try {
+            const guest = JSON.parse(e.dataTransfer.getData("application/json"));
+            // Trova la prima sedia vuota
+            const primoPostoVuoto = Array.from({ length: tavolo.capienza }).findIndex((_, i) =>
+              !ospiti.some((o) =>
+                o.sedia_index !== null && o.sedia_index !== undefined
+                  ? o.sedia_index === i
+                  : o.rsvp_guest_index === i ||
+                    (o.fonte === "manuale" && ospiti.indexOf(o) === i)
+              )
+            );
+            if (primoPostoVuoto !== -1) {
+              onAssegna(tavolo.id, primoPostoVuoto, guest);
+            }
+          } catch (err) {
+            console.error("Errore drop su tavolo:", err);
+          }
         }}
       >
-        <span style={{ fontSize: "0.88rem" }}>{tavolo.nome}</span>
+        <span
+          style={{
+            fontFamily: "var(--f-titolo)",
+            fontSize: isSposi ? "1.6rem" : "1.25rem",
+            fontWeight: "bold",
+            lineHeight: 1.1,
+            color: isSposi ? "white" : "var(--c-testo)",
+            textAlign: "center",
+          }}
+        >
+          {isSposi ? "S & F" : tavolo.nome}
+        </span>
+        {isSposi && (
+          <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)", fontFamily: "var(--f-testo)" }}>
+            Sposi
+          </span>
+        )}
       </div>
 
       {/* Sedie disposte intorno */}
       {sediePos.map((pos, idx) => {
-        // Cerca l'occupante di questa sedia. Il nuovo modello usa sedia_index
-        // (la sedia effettivamente scelta col click); per i dati creati prima
-        // della colonna si ricade sul vecchio abbinamento.
+        // Cerca l'occupante di questa sedia
         const occupante = ospiti.find((o) =>
           o.sedia_index !== null && o.sedia_index !== undefined
             ? o.sedia_index === idx
@@ -211,6 +262,23 @@ export function TavoloCerchio({
                 onClick={(e) => {
                   e.stopPropagation(); // Evita il drag/evidenzia sul tavolo
                   onAssegna(tavolo.id, idx);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add("drag-over");
+                }}
+                onDragLeave={(e) => {
+                  e.currentTarget.classList.remove("drag-over");
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove("drag-over");
+                  try {
+                    const guest = JSON.parse(e.dataTransfer.getData("application/json"));
+                    onAssegna(tavolo.id, idx, guest);
+                  } catch (err) {
+                    console.error("Errore drop su sedia:", err);
+                  }
                 }}
                 aria-label="Assegna sedia"
               >

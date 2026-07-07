@@ -46,11 +46,76 @@ export async function fetchGuestsAndTables() {
   if (tavoliRes.error) throw new Error("Errore nel caricamento Tavoli: " + tavoliRes.error.message);
   if (postiRes.error) throw new Error("Errore nel caricamento Posti: " + postiRes.error.message);
 
-  return {
-    rsvps: rsvpRes.data as DBRsvp[],
-    tavoli: tavoliRes.data as DBTable[],
-    posti: postiRes.data as DBSeat[],
-  };
+  const rsvps = rsvpRes.data as DBRsvp[];
+  const tavoli = tavoliRes.data as DBTable[];
+  const posti = postiRes.data as DBSeat[];
+
+  // Controlla se esiste già un tavolo chiamato "Sposi" (case-insensitive)
+  const haSposi = tavoli.some((t) => t.nome.toLowerCase() === "sposi");
+
+  // Esegui il seeding solo se le variabili d'ambiente Supabase sono configurate
+  const urlValido = import.meta.env.VITE_SUPABASE_URL && !import.meta.env.VITE_SUPABASE_URL.includes("placeholder");
+  
+  if (!haSposi && urlValido) {
+    try {
+      // 1. Crea il tavolo Sposi
+      const { data: nuovoTavolo, error: errorTavolo } = await supabase
+        .from("tavoli")
+        .insert({
+          nome: "Sposi",
+          capienza: 2,
+          forma: "tondo",
+          pos_x: 400,
+          pos_y: 200,
+        })
+        .select()
+        .single();
+
+      if (errorTavolo) {
+        console.error("Errore creazione tavolo Sposi:", errorTavolo.message);
+      } else if (nuovoTavolo) {
+        const t = nuovoTavolo as DBTable;
+        tavoli.push(t);
+
+        // 2. Crea i posti per Stefano (sedia 0) e Francesca (sedia 1)
+        const { data: postoS, error: errorS } = await supabase
+          .from("posti")
+          .insert({
+            tavolo_id: t.id,
+            nome: "Stefano",
+            cognome: "",
+            tipo: "adulto",
+            fonte: "manuale",
+            sedia_index: 0,
+          })
+          .select()
+          .single();
+
+        const { data: postoF, error: errorF } = await supabase
+          .from("posti")
+          .insert({
+            tavolo_id: t.id,
+            nome: "Francesca",
+            cognome: "",
+            tipo: "adulto",
+            fonte: "manuale",
+            sedia_index: 1,
+          })
+          .select()
+          .single();
+
+        if (errorS) console.error("Errore inserimento posto Stefano:", errorS.message);
+        else if (postoS) posti.push(postoS as DBSeat);
+
+        if (errorF) console.error("Errore inserimento posto Francesca:", errorF.message);
+        else if (postoF) posti.push(postoF as DBSeat);
+      }
+    } catch (err) {
+      console.error("Errore durante l'auto-seeding del tavolo Sposi:", err);
+    }
+  }
+
+  return { rsvps, tavoli, posti };
 }
 
 /**
@@ -187,4 +252,29 @@ export async function rimuoviAccompagnatore(rsvp: DBRsvp, guestIndex: number) {
         .eq("id", p.id);
     }
   }
+}
+
+/**
+ * Crea un nuovo invitato manuale nel database (scritto direttamente in rsvp
+ * con is_compiler: true per poterlo sistemare in seguito).
+ */
+export async function creaInvitatoManuale(
+  nome: string,
+  cognome: string,
+  tipo: "adulto" | "bambino",
+  allergie: string | null
+): Promise<DBRsvp> {
+  const { data, error } = await supabase
+    .from("rsvp")
+    .insert({
+      nome_contatto: `${nome.trim()} ${cognome.trim()}`,
+      presenza: true,
+      guests: [{ nome: nome.trim(), cognome: cognome.trim(), tipo, is_compiler: true }],
+      allergie: allergie ? allergie.trim() : null,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error("Impossibile creare l'invitato: " + error.message);
+  return data as DBRsvp;
 }
