@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { passwordCorretta } from "../../lib/password";
+// import { passwordCorretta } from "../../lib/password"; // usato dal blocco password, commentato temporaneamente
 import { sposi } from "../../lib/dati-evento";
 import "./Envelope.css";
 
@@ -18,12 +18,13 @@ interface Particle {
 }
 
 export function Envelope({ onAperta }: { onAperta: () => void }) {
-  const [state, setState] = useState<EnvelopeState>("chiusa");
-  const [testo, setTesto] = useState("");
-  const [tentativi, setTentativi] = useState(0);
+  const [state, setState] = useState<EnvelopeState>("sbloccata"); // era "chiusa", input rimosso temporaneamente
+  // const [testo, setTesto] = useState("");
+  // const [tentativi, setTentativi] = useState(0);
   const [particles, setParticles] = useState<Particle[]>([]);
   const riduci = useReducedMotion();
 
+  /* TEMPORANEAMENTE DISABILITATO — formattaTesto usato solo con l'input password
   function formattaTesto(str: string): string {
     return str
       .split(/(\s+|&|\+)/)
@@ -47,7 +48,9 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
       })
       .join("");
   }
+  */
 
+  /* TEMPORANEAMENTE DISABILITATO — input nome/password rimosso
   function handleChange(v: string) {
     const formattato = formattaTesto(v);
     setTesto(formattato);
@@ -61,6 +64,7 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
   function handleBlurCheck() {
     if (state === "chiusa" && testo.length > 0) setTentativi((t) => t + 1);
   }
+  */
 
   function generateSparkles() {
     const newParticles: Particle[] = Array.from({ length: 45 }).map((_, i) => {
@@ -112,6 +116,7 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
           transition={{ duration: riduci ? 0.3 : 0.9, ease: [0.22, 1, 0.36, 1] }}
         />
 
+        {/* TEMPORANEAMENTE DISABILITATO — input nome/password
         <div className="envelope-input-riga">
           <input
             className="envelope-input"
@@ -129,17 +134,17 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
             Suggerimento: il nome di entrambi gli sposi.
           </p>
         )}
+        */}
 
         <motion.button
           type="button"
           className="sigillo"
-          disabled={state === "chiusa"}
           onClick={apri}
           aria-label="Apri la busta"
           animate={
             state === "sbloccata"
               ? { scale: [1, 1.06, 1] }
-              : { scale: 1, opacity: state === "chiusa" ? 0.45 : 1 }
+              : { scale: 1 }
           }
           transition={{ duration: 0.6 }}
         >
