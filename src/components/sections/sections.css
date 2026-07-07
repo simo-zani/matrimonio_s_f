@@ -110,3 +110,18 @@
   background: var(--c-oro);
   color: var(--c-bianco);
 }
+
+/* ── Mobile: i nomi lunghi non stanno su una riga sola, li impiliamo ── */
+@media (max-width: 600px) {
+  .hero-nomi {
+    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+    font-size: clamp(1.6rem, 8vw, 2.4rem);
+  }
+  .hero-nomi .hero-e {
+    margin: 0.1em 0;
+  }
+}

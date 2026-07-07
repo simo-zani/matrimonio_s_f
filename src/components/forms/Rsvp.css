@@ -133,6 +133,17 @@ textarea:focus {
   border-color: var(--c-oro);
 }
 
+/* ── Mobile: su schermi stretti nome e cognome affiancati, "bambino" sotto ── */
+@media (max-width: 480px) {
+  .riga-ospite {
+    grid-template-columns: 1fr 1fr;
+  }
+  .riga-ospite .toggle-bambino {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
 .rsvp-errore {
   color: #b23b3b;
   margin-bottom: var(--sp-2);
