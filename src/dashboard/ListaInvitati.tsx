@@ -222,6 +222,7 @@ export function ListaInvitati({ rsvps, onAggiorna }: ListaInvitatiProps) {
           </tbody>
         </table>
       </div>
+      </div>
 
       {invitatoDaEliminare && (
         <ModaleConferma
