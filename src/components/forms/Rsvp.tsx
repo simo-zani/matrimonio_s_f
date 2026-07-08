@@ -230,13 +230,6 @@ export function Rsvp() {
       >
         {stato === "sending" ? "Invio…" : "Invia risposta"}
       </button>
-
-      {!supabaseConfigurato && (
-        <p className="rsvp-nota-dev">
-          Supabase non ancora collegato: questa è solo l'interfaccia, l'invio
-          non si salva da nessuna parte finché non compili .env.
-        </p>
-      )}
     </section>
   );
 }

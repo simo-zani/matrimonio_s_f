@@ -1,7 +1,13 @@
 .sezione {
-  padding: var(--sp-8) var(--sp-4);
+  padding: 0 var(--sp-4);
   max-width: 780px;
   margin: 0 auto;
+}
+
+/* Gap uguale tra tutte le sezioni consecutive (countdown/hero, storia,
+   dove & quando, conferma la presenza) */
+.sezione + .sezione {
+  margin-top: var(--sp-8);
 }
 
 .hero {
@@ -25,6 +31,19 @@
   white-space: nowrap;
 }
 
+/* Desktop: abbiamo spazio, ingrandiamo un po' i nomi degli sposi (mobile
+   invariato). Deve stare DOPO la regola base per vincere a parità di specificità.
+   Allarghiamo anche il contenitore dell'hero così il nome (in nowrap) ci sta
+   dentro senza sforare e resta centrato rispetto al viewport. */
+@media (min-width: 700px) {
+  .hero {
+    max-width: 960px;
+  }
+  .hero-nomi {
+    font-size: clamp(2.8rem, 4.2vw, 3.4rem);
+  }
+}
+
 .hero-e {
   font-family: var(--f-titolo);
   color: var(--c-oro);
@@ -34,6 +53,35 @@
   margin-top: var(--sp-3);
   font-size: 1.1rem;
   color: var(--c-testo);
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+
+.countdown-voce {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.2rem;
+}
+
+.countdown-numero {
+  font-family: var(--f-titolo);
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  line-height: 1;
+  color: var(--c-oro-scuro);
+}
+
+.countdown-etichetta {
+  margin-top: var(--sp-1);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-oro);
 }
 
 .storia h2,
@@ -52,6 +100,37 @@
   margin-top: var(--sp-3);
 }
 
+/* Foto bambini: mostrata per intero (nessun ritaglio), sfumata come le altre.
+   Sovrascrive aspect-ratio/object-fit ereditati dalla regola della maschera. */
+.storia-foto {
+  width: 100%;
+  height: auto;
+  margin: var(--sp-6) auto 0;
+  max-width: 420px;
+}
+
+/* Mobile/tablet: testo sopra, foto sotto (comportamento di default) */
+.storia-corpo {
+  display: block;
+}
+
+/* Desktop: foto a destra del testo, centrata verticalmente rispetto al testo */
+@media (min-width: 760px) {
+  .storia-corpo {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+  }
+  .storia-corpo .storia-testo {
+    flex: 1;
+  }
+  .storia-foto {
+    margin: 0;
+    flex: 0 0 40%;
+    max-width: 360px;
+  }
+}
+
 .luoghi {
   display: grid;
   grid-template-columns: 1fr;
@@ -64,6 +143,13 @@
   }
 }
 
+/* Desktop: allarghiamo la sezione così le due foto risultano un po' più grandi */
+@media (min-width: 900px) {
+  .dove-quando {
+    max-width: 940px;
+  }
+}
+
 .luogo-card {
   text-align: center;
   padding-bottom: var(--sp-4);
@@ -73,10 +159,22 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+}
+
+/* Maschera sfumata condivisa: dissolve i contorni fondendoli con lo sfondo.
+   Due gradienti (orizzontale + verticale) incrociati sfumano tutti e quattro
+   i lati mantenendo la forma rettangolare della foto. */
+.luogo-card img,
+.storia-foto {
   display: block;
-  /* Nessun bordo: i margini dell'immagine si sfumano e si fondono con lo sfondo */
-  -webkit-mask-image: radial-gradient(ellipse 92% 90% at center, #000 55%, transparent 94%);
-  mask-image: radial-gradient(ellipse 92% 90% at center, #000 55%, transparent 94%);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .luogo-card h3 {
@@ -111,11 +209,13 @@
   color: var(--c-bianco);
 }
 
-/* ── Mobile: riduciamo lo spazio verticale tra le sezioni (es. villa → RSVP) ── */
+/* ── Mobile: riduciamo il gap tra le sezioni (es. villa → RSVP) ── */
 @media (max-width: 600px) {
-  .sezione {
+  .sezione + .sezione {
+    margin-top: var(--sp-4);
+  }
+  .hero {
     padding-top: var(--sp-4);
-    padding-bottom: var(--sp-4);
   }
 }
 

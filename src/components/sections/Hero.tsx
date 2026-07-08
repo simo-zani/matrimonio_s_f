@@ -1,4 +1,5 @@
 import { sposi, evento } from "../../lib/dati-evento";
+import { Countdown } from "./Countdown";
 import "./sections.css";
 
 export function Hero() {
@@ -13,6 +14,7 @@ export function Hero() {
       <p className="hero-data">
         {evento.dataLeggibile} · ore {evento.ora}
       </p>
+      <Countdown />
     </section>
   );
 }

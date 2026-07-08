@@ -2,6 +2,13 @@
   padding-bottom: var(--sp-8);
 }
 
+/* Titolo centrato, stesso stile di "Dove & quando" */
+.rsvp h2 {
+  text-align: center;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  margin-bottom: var(--sp-6);
+}
+
 .rsvp-scadenza {
   text-align: center;
   color: var(--c-oro-scuro);
