@@ -171,7 +171,7 @@
 /* ── Tabella Lista Invitati ── */
 .invitati-sezione {
   padding: var(--sp-6);
-  max-width: 1100px;
+  max-width: 1600px;
   margin: 0 auto;
   width: 100%;
   flex: 1;
@@ -212,13 +212,18 @@
   background: white;
   border: 1px solid var(--c-oro-scuro);
   border-radius: 10px;
-  overflow: hidden;
+  /* overflow visibile per permettere all'header della tabella di restare
+     fisso (position: sticky) durante lo scorrimento di .invitati-sezione */
+  overflow: visible;
   box-shadow: 0 5px 15px rgba(0,0,0,0.03);
 }
 
 .rsvp-table {
   width: 100%;
-  border-collapse: collapse;
+  /* separate (non collapse) così il border-radius sulle celle d'angolo funziona
+     e l'evidenziazione hover non sborda dagli angoli arrotondati del contenitore */
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
@@ -228,6 +233,18 @@
   font-family: var(--f-titolo);
   font-weight: 600;
   border-bottom: 1.5px solid var(--c-oro);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(74, 64, 56, 0.06);
+}
+
+.rsvp-table th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.rsvp-table th:last-child {
+  border-top-right-radius: 10px;
 }
 
 .rsvp-table td {
@@ -238,6 +255,19 @@
 
 .rsvp-table tr:hover td {
   background: #fdfcfa;
+}
+
+/* Ultima riga: niente bordo inferiore e angoli arrotondati, così non sborda dal contenitore */
+.rsvp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rsvp-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.rsvp-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
 }
 
 .badge-presenza {
@@ -314,17 +344,33 @@
   padding: var(--sp-2);
 }
 
+/* Nucleo: raggruppa gli invitati della stessa famiglia in un contenitore più scuro */
+.nucleo-gruppo {
+  background: #f1e9db;
+  border: 1px solid #e6dac2;
+  border-radius: 8px;
+  padding: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 /* Righe sidebar sinistra */
 .riga-disponibile {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--sp-2);
-  margin-bottom: 6px;
   border-radius: 6px;
   border: 1px solid #f2ece1;
+  background: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.nucleo-gruppo .riga-disponibile {
+  margin-bottom: 0;
 }
 
 .riga-disponibile:hover {
@@ -453,6 +499,49 @@
   background: var(--c-oro);
   color: white;
   border-color: var(--c-oro-scuro);
+}
+
+/* Variante sul canvas: stessa dimensione/stile dei controlli zoom */
+.nuovo-tavolo-canvas {
+  position: absolute;
+  bottom: var(--sp-4);
+  right: var(--sp-4);
+  z-index: 100;
+  width: auto;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+  border: 1px solid var(--c-oro);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(74, 64, 56, 0.08);
+}
+
+/* Mini pulsanti freccia/stepper nel pannello espanso del tavolo */
+.mini-arrow-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--c-oro);
+  background: white;
+  color: var(--c-oro-scuro);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.mini-arrow-btn:hover:not(:disabled) {
+  background: var(--c-oro);
+  color: white;
+}
+
+.mini-arrow-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 /* Righe sidebar destra */
@@ -600,6 +689,9 @@
   border-color: var(--c-oro-scuro) !important;
   color: white !important;
   box-shadow: 0 6px 15px rgba(163, 133, 63, 0.25) !important;
+  /* Il corpo del tavolo passa davanti alle sedie, che si vedono spuntare dietro */
+  position: relative;
+  z-index: 2;
 }
 
 /* Drag Over Highlights */
@@ -620,11 +712,19 @@
   box-shadow: 0 0 0 5px rgba(46, 204, 113, 0.3);
 }
 
-/* Controlli di Zoom Floating */
-.zoom-controls {
+/* Barra dei controlli in basso a sinistra */
+.canvas-toolbar {
   position: absolute;
   bottom: var(--sp-4);
   left: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  z-index: 100;
+}
+
+/* Controlli di Zoom Floating */
+.zoom-controls {
   display: flex;
   align-items: center;
   gap: var(--sp-1);
@@ -633,7 +733,6 @@
   border-radius: 8px;
   padding: 4px;
   box-shadow: 0 4px 12px rgba(74, 64, 56, 0.08);
-  z-index: 100;
 }
 
 .zoom-controls button {
@@ -667,13 +766,27 @@
   user-select: none;
 }
 
-.zoom-reset-btn {
-  font-size: 0.8rem !important;
-  width: auto !important;
-  padding: 0 8px !important;
-  font-weight: 600 !important;
-  border-left: 1px solid #f2ece1 !important;
-  border-radius: 0 !important;
+/* Pulsante Ricentra: box a sé, stessa altezza dei controlli zoom */
+.ricentra-btn {
+  background: white;
+  border: 1px solid var(--c-oro);
+  border-radius: 8px;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--c-oro-scuro);
+  box-shadow: 0 4px 12px rgba(74, 64, 56, 0.08);
+  transition: all 0.2s ease;
+}
+
+.ricentra-btn:hover {
+  background: var(--c-oro);
+  color: white;
+  border-color: var(--c-oro-scuro);
 }
 
 /* Highlight azzurro */
@@ -713,6 +826,21 @@
   transform: scale(1.1);
 }
 
+/* Sedia "armata": cliccata, in attesa che si scelga un invitato dalla lista */
+.sedia-vuota.in-attesa {
+  background: var(--c-verde-sedia);
+  color: white;
+  border-color: var(--c-verde-sedia);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.35);
+  animation: sedia-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sedia-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.35); }
+  50% { box-shadow: 0 0 0 7px rgba(46, 204, 113, 0.15); }
+}
+
 .sedia-piena {
   position: relative;
   width: 32px;
@@ -726,6 +854,16 @@
   font-size: 11px;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Sedie del tavolo Sposi: mostrano il nome intero, non le iniziali */
+.sedia-piena-sposi {
+  width: auto;
+  min-width: 32px;
+  padding: 0 8px;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .rimuovi-x {

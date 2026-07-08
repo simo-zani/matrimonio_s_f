@@ -1,4 +1,5 @@
-import { motion } from "motion/react";
+import { useEffect } from "react";
+import { motion, useMotionValue } from "motion/react";
 import type { DBTable, DBSeat } from "../lib/queries";
 import "../dashboard.css";
 
@@ -11,6 +12,7 @@ interface TavoloCerchioProps {
   onRimuovi: (postoId: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
   onEvidenzia: () => void;
+  postoTarget: { tavoloId: string; sediaIndex: number } | null;
   zoom: number;
 }
 
@@ -22,9 +24,20 @@ export function TavoloCerchio({
   onRimuovi,
   onDragEnd,
   onEvidenzia,
-  zoom,
+  postoTarget,
 }: TavoloCerchioProps) {
   const isSposi = tavolo.nome.toLowerCase() === "sposi";
+
+  // La posizione vive interamente nei motion values x/y (transform), così non
+  // resta un transform residuo da sommare a left/top (che raddoppiava lo spostamento).
+  const x = useMotionValue(tavolo.pos_x);
+  const y = useMotionValue(tavolo.pos_y);
+
+  // Riallinea x/y quando la posizione cambia dall'esterno (es. dopo il refetch).
+  useEffect(() => {
+    x.set(tavolo.pos_x);
+    y.set(tavolo.pos_y);
+  }, [tavolo.pos_x, tavolo.pos_y, x, y]);
 
   // Dimensioni e calcolo delle posizioni delle sedie in base alla forma
   let w = 140;
@@ -35,13 +48,18 @@ export function TavoloCerchio({
 
   const capienza = tavolo.capienza;
 
+  const offSedia = 24; // distanza costante tra il bordo del tavolo e le sedie
+  const slotSedia = 44; // spaziatura minima tra i centri di due sedie adiacenti
+
   if (tavolo.forma === "tondo") {
-    w = 140;
-    h = 140;
     classForma = "tavolo-tondo";
     borderRadius = "50%";
-    const raggioCentrale = 70;
-    const raggioSedie = raggioCentrale + 24;
+    // Raggio dinamico: l'anello delle sedie deve avere circonferenza >= slot·capienza,
+    // così oltre un certo numero di invitati il tavolo si allarga e non si sovrappongono.
+    const raggioSedie = Math.max(94, (slotSedia * capienza) / (2 * Math.PI));
+    const raggioCentrale = raggioSedie - offSedia;
+    w = raggioCentrale * 2;
+    h = raggioCentrale * 2;
 
     for (let i = 0; i < capienza; i++) {
       let angolo = (360 / capienza) * i - 90; // Inizia dall'alto (-90deg)
@@ -55,14 +73,27 @@ export function TavoloCerchio({
       });
     }
   } else if (tavolo.forma === "ellisse") {
-    w = 160;
-    h = 100;
     classForma = "tavolo-ellisse";
     borderRadius = "50%";
-    const cx = 80;
-    const cy = 50;
-    const rxSedie = 80 + 24;
-    const rySedie = 50 + 24;
+    // Fattore di crescita: scala l'ellisse (mantenendo le proporzioni) finché il
+    // perimetro dell'anello sedie basta a contenere tutte le sedie senza sovrapporle.
+    const rxBase = 80;
+    const ryBase = 50;
+    // Perimetro ellisse (approssimazione di Ramanujan)
+    const perim = (a: number, b: number) =>
+      Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)));
+    const fattore = Math.max(
+      1,
+      (slotSedia * capienza) / perim(rxBase + offSedia, ryBase + offSedia)
+    );
+    const rx = rxBase * fattore;
+    const ry = ryBase * fattore;
+    w = rx * 2;
+    h = ry * 2;
+    const cx = rx;
+    const cy = ry;
+    const rxSedie = rx + offSedia;
+    const rySedie = ry + offSedia;
 
     for (let i = 0; i < capienza; i++) {
       const angolo = (360 / capienza) * i - 90;
@@ -73,59 +104,66 @@ export function TavoloCerchio({
       });
     }
   } else if (tavolo.forma === "quadrato") {
-    w = 140;
-    h = 140;
     classForma = "tavolo-quadrato";
     borderRadius = "10px";
-    const side = 140;
     const offsetSedia = 24;
 
-    for (let i = 0; i < capienza; i++) {
-      const perimetroPos = (side * 4 / capienza) * i;
-      let sx = 0;
-      let sy = 0;
+    // Distribuisci le sedie il più equamente possibile sui 4 lati [top, right, bottom, left]
+    const perLato = [0, 0, 0, 0];
+    const base = Math.floor(capienza / 4);
+    const resto = capienza % 4;
+    for (let s = 0; s < 4; s++) perLato[s] = base;
+    const ordineResto = [0, 2, 3, 1]; // il resto va prima a top e bottom, poi a left e right
+    for (let k = 0; k < resto; k++) perLato[ordineResto[k]]++;
 
-      if (perimetroPos < side) {
-        // Lato Superiore (da sinistra a destra)
-        sx = perimetroPos;
-        sy = -offsetSedia;
-      } else if (perimetroPos < side * 2) {
-        // Lato Destro (dall'alto in basso)
-        sx = side + offsetSedia;
-        sy = perimetroPos - side;
-      } else if (perimetroPos < side * 3) {
-        // Lato Inferiore (da destra a sinistra)
-        sx = side - (perimetroPos - side * 2);
-        sy = side + offsetSedia;
-      } else {
-        // Lato Sinistro (dal basso in alto)
-        sx = -offsetSedia;
-        sy = side - (perimetroPos - side * 3);
-      }
+    // Lato dinamico: evita che le sedie si sovrappongano sul lato più affollato
+    const maxPerLato = Math.max(...perLato, 1);
+    const slotSedia = 44;
+    const side = Math.max(140, slotSedia * (maxPerLato + 1));
+    w = side;
+    h = side;
 
-      sediePos.push({ x: sx, y: sy });
-    }
+    // Sedie equidistanti lungo ogni lato, con margine dagli angoli.
+    // Ordine di push lungo il perimetro (top → right → bottom → left) per mantenere
+    // coerente l'adiacenza usata negli avvisi sul nucleo.
+    for (let j = 0; j < perLato[0]; j++) // top: da sinistra a destra
+      sediePos.push({ x: (side * (j + 1)) / (perLato[0] + 1), y: -offsetSedia });
+    for (let j = 0; j < perLato[1]; j++) // right: dall'alto in basso
+      sediePos.push({ x: side + offsetSedia, y: (side * (j + 1)) / (perLato[1] + 1) });
+    for (let j = 0; j < perLato[2]; j++) // bottom: da destra a sinistra
+      sediePos.push({ x: side - (side * (j + 1)) / (perLato[2] + 1), y: side + offsetSedia });
+    for (let j = 0; j < perLato[3]; j++) // left: dal basso in alto
+      sediePos.push({ x: -offsetSedia, y: side - (side * (j + 1)) / (perLato[3] + 1) });
   } else if (tavolo.forma === "imperiale") {
-    w = 220;
     h = 80;
     classForma = "tavolo-imperiale";
     borderRadius = "6px";
     const offsetSedia = 24;
 
-    // Metà sopra e metà sotto, senza capotavola
-    const nSopra = Math.ceil(capienza / 2);
+    // Le sedie sono disposte in colonne (coppie che si fronteggiano), senza capotavola.
+    // Con capienza dispari l'ultima colonna ha solo la sedia sopra (nessuno di fronte).
+    const nColonne = Math.ceil(capienza / 2);
+    const nSopra = nColonne;
     const nSotto = capienza - nSopra;
 
-    // Sedie Sopra
-    for (let i = 0; i < nSopra; i++) {
-      const sx = nSopra === 1 ? w / 2 : 24 + ((w - 48) / (nSopra - 1)) * i;
-      sediePos.push({ x: sx, y: -offsetSedia });
+    // Larghezza dinamica: ogni colonna ha il suo "slot", così le sedie restano sempre
+    // visibili e non sovrapposte, con un piccolo gap tra una e l'altra.
+    const slotSedia = 44; // distanza tra i centri di due colonne adiacenti
+    const bordoLat = 24; // margine tra bordo del tavolo e prima/ultima sedia
+    w = Math.max(160, slotSedia * (nColonne - 1) + bordoLat * 2);
+
+    // x del centro della colonna c (stesso per la sedia sopra e quella sotto → si fronteggiano)
+    const colX = (c: number) =>
+      nColonne === 1 ? w / 2 : bordoLat + ((w - bordoLat * 2) / (nColonne - 1)) * c;
+
+    // Sedie Sopra (una per colonna)
+    for (let c = 0; c < nSopra; c++) {
+      sediePos.push({ x: colX(c), y: -offsetSedia });
     }
 
-    // Sedie Sotto
-    for (let i = 0; i < nSotto; i++) {
-      const sx = nSotto === 1 ? w / 2 : 24 + ((w - 48) / (nSotto - 1)) * i;
-      sediePos.push({ x: sx, y: h + offsetSedia });
+    // Sedie Sotto (allineate sotto le prime colonne)
+    for (let c = 0; c < nSotto; c++) {
+      sediePos.push({ x: colX(c), y: h + offsetSedia });
     }
   }
 
@@ -138,17 +176,20 @@ export function TavoloCerchio({
     <motion.div
       drag
       dragMomentum={false}
-      onDragEnd={(_, info) => {
-        // Salva le nuove coordinate dividendo lo spostamento per lo zoom corrente
-        const deltaX = info.offset.x / zoom;
-        const deltaY = info.offset.y / zoom;
-        onDragEnd(tavolo.id, Math.round(tavolo.pos_x + deltaX), Math.round(tavolo.pos_y + deltaY));
+      onDragEnd={() => {
+        // La posizione finale è già nel motion value (nessun raddoppio).
+        const nx = Math.max(0, Math.round(x.get()));
+        const ny = Math.max(0, Math.round(y.get()));
+        x.set(nx);
+        y.set(ny);
+        onDragEnd(tavolo.id, nx, ny);
       }}
       onPointerDown={onEvidenzia}
+      onClick={(e) => e.stopPropagation()}
       className="tavolo-contenitore"
       style={{
-        left: tavolo.pos_x,
-        top: tavolo.pos_y,
+        x,
+        y,
         width: w,
         height: h,
       }}
@@ -207,13 +248,8 @@ export function TavoloCerchio({
             textAlign: "center",
           }}
         >
-          {isSposi ? "SPOSI" : tavolo.nome}
+          {isSposi ? "SPOSI" : tavolo.nome.toUpperCase()}
         </span>
-        {isSposi && (
-          <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.9)", fontFamily: "var(--f-testo)", fontWeight: "bold", letterSpacing: "0.03em", marginTop: "3px", textAlign: "center" }}>
-            STEFANO e FRANCESCA
-          </span>
-        )}
       </div>
 
       {/* Sedie disposte intorno */}
@@ -238,28 +274,36 @@ export function TavoloCerchio({
           >
             {occupante ? (
               <div
-                className="sedia-piena"
+                className={`sedia-piena ${isSposi ? "sedia-piena-sposi" : ""}`}
                 title={`${occupante.nome} ${occupante.cognome}${
                   occupante.allergie ? ` (Allergie: ${occupante.allergie})` : ""
                 }`}
               >
-                <span>{getSigla(occupante)}</span>
-                <button
-                  type="button"
-                  className="rimuovi-x"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Evita il drag/evidenzia sul tavolo
-                    onRimuovi(occupante.id);
-                  }}
-                  aria-label="Rimuovi ospite"
-                >
-                  ×
-                </button>
+                <span>{isSposi ? occupante.nome.toUpperCase() : getSigla(occupante)}</span>
+                {!isSposi && (
+                  <button
+                    type="button"
+                    className="rimuovi-x"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Evita il drag/evidenzia sul tavolo
+                      onRimuovi(occupante.id);
+                    }}
+                    aria-label="Rimuovi ospite"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             ) : (
               <button
                 type="button"
-                className="sedia-vuota"
+                className={`sedia-vuota ${
+                  postoTarget &&
+                  postoTarget.tavoloId === tavolo.id &&
+                  postoTarget.sediaIndex === idx
+                    ? "in-attesa"
+                    : ""
+                }`}
                 onClick={(e) => {
                   e.stopPropagation(); // Evita il drag/evidenzia sul tavolo
                   onAssegna(tavolo.id, idx);

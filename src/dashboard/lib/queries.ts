@@ -149,6 +149,28 @@ export async function aggiornaPosizioneTavolo(id: string, x: number, y: number) 
 }
 
 /**
+ * Aggiorna il numero di posti (capienza) di un tavolo.
+ */
+export async function aggiornaCapienzaTavolo(id: string, capienza: number) {
+  const { error } = await supabase
+    .from("tavoli")
+    .update({ capienza })
+    .eq("id", id);
+  if (error) throw new Error("Impossibile aggiornare i posti del tavolo: " + error.message);
+}
+
+/**
+ * Sposta un posto su un'altra sedia (aggiorna sedia_index).
+ */
+export async function spostaPosto(posto_id: string, sedia_index: number) {
+  const { error } = await supabase
+    .from("posti")
+    .update({ sedia_index })
+    .eq("id", posto_id);
+  if (error) throw new Error("Impossibile spostare l'invitato: " + error.message);
+}
+
+/**
  * Cancella un tavolo.
  */
 export async function cancellaTavolo(id: string) {

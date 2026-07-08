@@ -48,7 +48,7 @@ function CountdownMessa() {
       alignItems: "center",
       gap: "4px"
     }}>
-      <span>⏳</span> {timeLeft}
+      {timeLeft}
     </div>
   );
 }
@@ -62,6 +62,9 @@ export function DashboardMain() {
   const [posti, setPosti] = useState<DBSeat[]>([]);
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState<string | null>(null);
+  // Zoom/pan della mappa tavoli: tenuti qui così sopravvivono al cambio di tab
+  const [zoomTavoli, setZoomTavoli] = useState(1);
+  const [panTavoli, setPanTavoli] = useState({ x: 0, y: 0 });
 
   async function caricaDati() {
     try {
@@ -96,13 +99,13 @@ export function DashboardMain() {
             className={`tab-btn ${tab === "invitati" ? "attiva" : ""}`}
             onClick={() => setTab("invitati")}
           >
-            👥 Invitati
+            Invitati
           </button>
           <button
             className={`tab-btn ${tab === "tavoli" ? "attiva" : ""}`}
             onClick={() => setTab("tavoli")}
           >
-            🪑 Piano Tavoli
+            Tavoli
           </button>
         </nav>
 
@@ -141,6 +144,10 @@ export function DashboardMain() {
                 tavoli={tavoli}
                 posti={posti}
                 onAggiorna={caricaDati}
+                zoom={zoomTavoli}
+                setZoom={setZoomTavoli}
+                pan={panTavoli}
+                setPan={setPanTavoli}
               />
             )}
           </>

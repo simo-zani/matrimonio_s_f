@@ -43,7 +43,6 @@ export function ModaleNuovoTavolo({ onChiudi, onSalva }: ModaleNuovoTavoloProps)
               <input
                 type="number"
                 min={1}
-                max={20}
                 value={capienza}
                 onChange={(e) => setCapienza(Number(e.target.value))}
                 required
