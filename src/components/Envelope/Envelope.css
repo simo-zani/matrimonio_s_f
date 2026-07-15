@@ -19,16 +19,29 @@
   display: block;
 }
 
-/* L'immagine della busta: oscillazione lenta e minima, sembra "volante" */
+/* Contenitore delle due buste: oscillazione lenta e minima, sembra "volante" */
+.envelope-stack {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: envelope-float 7s ease-in-out infinite;
+}
+
 .envelope-img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 22px 40px rgba(74, 64, 56, 0.4));
-  animation: envelope-float 7s ease-in-out infinite;
   -webkit-user-drag: none;
   user-select: none;
+}
+
+/* La busta col sigillo sta sopra quella senza, perfettamente sovrapposta */
+.envelope-img-overlay {
+  position: absolute;
+  inset: 0;
 }
 
 /* Bagliore soave che parte da dietro la busta */
@@ -93,7 +106,7 @@
 
 /* Rispetta la preferenza di movimento ridotto: niente oscillazione */
 @media (prefers-reduced-motion: reduce) {
-  .envelope-img {
+  .envelope-stack {
     animation: none;
   }
 }

@@ -107,12 +107,25 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
         aria-label="Apri la busta"
         whileTap={riduci ? undefined : { scale: 0.97 }}
       >
-        <img
-          className="envelope-img"
-          src="/immagini/busta_sigillo.png"
-          alt={`Invito di ${sposi.iniziali} — tocca per aprire`}
-          draggable={false}
-        />
+        <span className="envelope-stack">
+          {/* Busta senza sigillo (base): resta sempre visibile sotto */}
+          <img
+            className="envelope-img"
+            src="/immagini/busta.png"
+            alt={`Invito di ${sposi.iniziali} — tocca per aprire`}
+            draggable={false}
+          />
+          {/* Busta col sigillo (overlay): si dissolve al click rivelando la busta aperta */}
+          <motion.img
+            className="envelope-img envelope-img-overlay"
+            src="/immagini/busta_sigillo.png"
+            alt=""
+            aria-hidden
+            draggable={false}
+            animate={{ opacity: state === "aperta" ? 0 : 1 }}
+            transition={{ duration: riduci ? 0.2 : 0.7, ease: "easeInOut" }}
+          />
+        </span>
 
         {/* Effetto scintillante */}
         {particles.map((p) => (
