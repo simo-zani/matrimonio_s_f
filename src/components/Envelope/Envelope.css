@@ -9,11 +9,26 @@
 
 .envelope {
   position: relative;
-  width: min(80vw, 480px);
-  aspect-ratio: 4 / 3;
-  transform-style: preserve-3d;
-  /* Oscillazione lenta e minima: la busta sembra "volante", non appiccicata */
+  width: min(82vw, 520px);
+  aspect-ratio: 1108 / 795; /* proporzioni dell'immagine busta.png */
+  /* reset del button */
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+}
+
+/* L'immagine della busta: oscillazione lenta e minima, sembra "volante" */
+.envelope-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 40px rgba(74, 64, 56, 0.4));
   animation: envelope-float 7s ease-in-out infinite;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 /* Bagliore soave che parte da dietro la busta */
@@ -42,27 +57,6 @@
 @keyframes envelope-glow {
   0%, 100% { opacity: 0.55; transform: scale(1); }
   50%      { opacity: 1;    transform: scale(1.07); }
-}
-
-/* Busta dorata con ricchi gradienti metallici */
-.envelope-corpo {
-  position: absolute;
-  inset: 0;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #f5e4bc 0%, #dab866 50%, #9e813a 100%);
-  box-shadow: 0 20px 45px -20px rgba(74, 64, 56, 0.45);
-  border: 1px solid var(--c-oro-scuro);
-}
-
-.envelope-lembo {
-  position: absolute;
-  inset: 0;
-  bottom: 45%;
-  transform-origin: top center;
-  background: linear-gradient(160deg, #fceecb 0%, #dab866 55%, #886b29 100%);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  border-radius: 6px 6px 0 0;
-  filter: drop-shadow(0 4px 6px rgba(74, 64, 56, 0.3));
 }
 
 .envelope-input-riga {
@@ -97,56 +91,9 @@
   font-style: italic;
 }
 
-.sigillo {
-  position: absolute;
-  left: 50%;
-  top: 55%; /* Allineato esattamente sulla punta del lembo */
-  margin-left: -32px; /* Centrato orizzontalmente (metà di 64px) */
-  margin-top: -32px;  /* Centrato verticalmente (metà di 64px) */
-  width: 64px;
-  height: 64px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(163, 133, 63, 0.6);
-  background: radial-gradient(circle at 30% 30%, #ffd984 0%, #dab866 55%, #6e541b 100%);
-  box-shadow: 
-    inset 0 0 8px rgba(0, 0, 0, 0.25),
-    inset 2px 2px 3px rgba(255, 255, 255, 0.4),
-    0 4px 12px rgba(74, 64, 56, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  z-index: 10;
-}
-
-.sigillo::before {
-  content: '';
-  position: absolute;
-  inset: 7px;
-  border-radius: 50%;
-  border: 1.5px double rgba(110, 84, 27, 0.4);
-  box-shadow: 
-    inset 1px 1px 2px rgba(255, 255, 255, 0.3),
-    1px 1px 1px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-}
-
-.sigillo:disabled {
-  cursor: default;
-}
-
-.sigillo-testo {
-  font-family: var(--f-script);
-  color: #4a3812; /* Colore scuro dell'incisione per contrasto */
-  text-shadow: 
-    -0.5px -0.5px 0.5px rgba(0, 0, 0, 0.6),
-    0.5px 0.5px 0.5px rgba(255, 255, 255, 0.5);
-  font-size: 1.7rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  line-height: 1;
-  z-index: 1;
+/* Rispetta la preferenza di movimento ridotto: niente oscillazione */
+@media (prefers-reduced-motion: reduce) {
+  .envelope-img {
+    animation: none;
+  }
 }

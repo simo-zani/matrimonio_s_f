@@ -100,59 +100,19 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
 
   return (
     <div className="envelope-scene">
-      <div
+      <motion.button
+        type="button"
         className="envelope"
-        style={{ perspective: riduci ? undefined : 1200 }}
+        onClick={apri}
+        aria-label="Apri la busta"
+        whileTap={riduci ? undefined : { scale: 0.97 }}
       >
-        <div className="envelope-corpo" />
-
-        <motion.div
-          className="envelope-lembo"
-          animate={
-            riduci
-              ? { opacity: state === "aperta" ? 0 : 1 }
-              : { rotateX: state === "aperta" ? -155 : 0 }
-          }
-          transition={{ duration: riduci ? 0.3 : 0.9, ease: [0.22, 1, 0.36, 1] }}
+        <img
+          className="envelope-img"
+          src="/immagini/busta_sigillo.png"
+          alt={`Invito di ${sposi.iniziali} — tocca per aprire`}
+          draggable={false}
         />
-
-        {/* TEMPORANEAMENTE DISABILITATO — input nome/password
-        <div className="envelope-input-riga">
-          <input
-            className="envelope-input"
-            value={testo}
-            disabled={state !== "chiusa"}
-            onChange={(e) => handleChange(e.target.value)}
-            onBlur={handleBlurCheck}
-            placeholder="i nostri nomi…"
-            aria-label="Password d'ingresso"
-          />
-        </div>
-
-        {tentativi >= 2 && state === "chiusa" && (
-          <p className="envelope-hint">
-            Suggerimento: il nome di entrambi gli sposi.
-          </p>
-        )}
-        */}
-
-        <motion.button
-          type="button"
-          className="sigillo"
-          onClick={apri}
-          aria-label="Apri la busta"
-          animate={
-            state === "sbloccata"
-              ? { scale: [1, 1.06, 1] }
-              : { scale: 1 }
-          }
-          transition={{ duration: 0.6 }}
-        >
-          {/* Sigillo senza spazio tra S e F */}
-          <span className="sigillo-testo">
-            {sposi.iniziali.replace(/\s+/g, "")}
-          </span>
-        </motion.button>
 
         {/* Effetto scintillante */}
         {particles.map((p) => (
@@ -200,7 +160,7 @@ export function Envelope({ onAperta }: { onAperta: () => void }) {
             )}
           </motion.div>
         ))}
-      </div>
+      </motion.button>
     </div>
   );
 }
