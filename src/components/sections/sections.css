@@ -7,7 +7,7 @@
 /* Gap uguale tra tutte le sezioni consecutive (countdown/hero, storia,
    dove & quando, conferma la presenza) */
 .sezione + .sezione {
-  margin-top: 6.5rem;
+  margin-top: 8rem;
 }
 
 .hero {
@@ -211,7 +211,7 @@
 /* ── Mobile: riduciamo il gap tra le sezioni (es. villa → RSVP) ── */
 @media (max-width: 600px) {
   .sezione + .sezione {
-    margin-top: 4.5rem;
+    margin-top: 6rem;
   }
   .storia-testo {
     text-align: center;

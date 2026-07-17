@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Envelope } from "./components/Envelope/Envelope";
 import { Cartoncino } from "./components/Reveal/Cartoncino";
@@ -36,6 +36,21 @@ function App() {
   if (window.location.pathname === DASHBOARD_PATH) {
     return <DashboardRouter />;
   }
+
+  // Blocco dello scorrimento verticale quando la busta è chiusa o in transizione
+  useEffect(() => {
+    if (fase !== "aperta") {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [fase]);
 
   const contenuto = (
     <Cartoncino>
