@@ -9,6 +9,7 @@
     #faf6eb;
   background-attachment: fixed;
   min-height: 100svh;
+  overflow-x: hidden;
 }
 
 /* ── Cornice dorata fissa più spessa e sfumata verso l'interno dello schermo ── */

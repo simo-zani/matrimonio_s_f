@@ -7,7 +7,7 @@
 /* Gap uguale tra tutte le sezioni consecutive (countdown/hero, storia,
    dove & quando, conferma la presenza) */
 .sezione + .sezione {
-  margin-top: var(--sp-8);
+  margin-top: 6.5rem;
 }
 
 .hero {
@@ -152,7 +152,6 @@
 
 .luogo-card {
   text-align: center;
-  padding-bottom: var(--sp-4);
 }
 
 .luogo-card img {
@@ -212,7 +211,10 @@
 /* ── Mobile: riduciamo il gap tra le sezioni (es. villa → RSVP) ── */
 @media (max-width: 600px) {
   .sezione + .sezione {
-    margin-top: var(--sp-4);
+    margin-top: 4.5rem;
+  }
+  .storia-testo {
+    text-align: center;
   }
   .hero {
     padding-top: var(--sp-4);
