@@ -46,16 +46,22 @@ export function linkMaps(indirizzo: string): string {
  * storia.md. Se preferite un testo diverso per il sito, aggiornate
  * assets/testi/storia.md e questo file va riallineato.
  */
-export const storia = `Eravamo amici, prima di tutto.
-Prima dei sogni condivisi, prima delle promesse, prima dell'amore.
-Eravamo presenza e complicità silenziosa.
+export const storia = `Ci sono incontri che sembrano semplici coincidenze e altri che rivelano di essere sempre stati destino.
 
-Poi, senza fare rumore, qualcosa ha trovato il suo posto.
-Un amore capace di aspettare, di capire, di restare.
-Così l'amicizia ha imparato a chiamarsi amore,
-ha scelto di diventare casa.
+La nostra storia è iniziata nel 2011. Eravamo poco più che bambini e ci siamo conosciuti grazie ai nostri fratelli. 
+Da quel giorno le nostre strade non si sono mai davvero separate. 
+La vita ci ha portati a vivere momenti diversi, ci ha fatti avvicinare e allontanare, ma il filo che ci univa non si è mai spezzato.
 
-Oggi non celebriamo un inizio, ma tutto il cammino che ci ha portati fin qui.`;
+Per anni siamo stati amici. Di quelli che si ritrovano sempre, anche dopo il silenzio. Di quelli che maturano insieme senza accorgersi che il tempo sta preparando qualcosa di ancora più bello.
+
+Poi è arrivato il 2023. 
+Senza fretta, senza forzature, abbiamo capito che ciò che avevamo sempre cercato era rimasto davanti ai nostri occhi per tutto quel tempo. 
+L’amicizia ha lasciato spazio a un amore profondo, fatto di fiducia, di rispetto e della certezza di aver trovato, finalmente, il posto in cui sentirsi a casa.
+
+Il 5 settembre non inizierà la nostra storia. 
+Quel giorno celebreremo quindici anni di sorrisi, ricordi, crescita e un legame che ha saputo aspettare il momento giusto per diventare il nostro per sempre.
+
+Grazie per essere qui, a condividere con noi il giorno più bello della nostra vita.`;
 
 /** DA CONFERMARE: nessuna scadenza RSVP indicata finora. */
 export const scadenzaRsvp = "DA CONFERMARE";
